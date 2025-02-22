@@ -23,30 +23,62 @@ const Register = () => {
     });
   }; 
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   const apiUrl = process.env.REACT_APP_API_URL;
+
+  //   try {
+  //     const response = await fetch(`${apiUrl}/api/register`, { 
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify(formData),
+  //     });
+
+  //     const data = await response.json();
+  //     if (response.ok) {
+  //      // alert('Registration successful!');
+  //       alert('Registration successful! You can now login.');
+  //       navigate('/login'); // Redirect to login page
+  //     } else {
+  //       alert(data.error);
+  //     }
+  //   } catch (error) {
+  //     console.error('Registration failed:', error);
+  //     alert('Something went wrong. Please try again.');
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const apiUrl = process.env.REACT_APP_API_URL;
-
+  
     try {
       const response = await fetch(`${apiUrl}/api/register`, { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phoneNumber: formData.phoneNumber,
+          password: formData.password,
+          role: formData.role
+        }),
       });
-
+  
       const data = await response.json();
       if (response.ok) {
-       // alert('Registration successful!');
         alert('Registration successful! You can now login.');
-        navigate('/login'); // Redirect to login page
+        navigate('/login');
       } else {
-        alert(data.error);
+        alert(data.detail);
       }
     } catch (error) {
       console.error('Registration failed:', error);
       alert('Something went wrong. Please try again.');
     }
   };
+  
 
   return (
     <div className="wrapper-register">
@@ -118,7 +150,7 @@ const Register = () => {
             value={formData.role}
             onChange={handleChange}
             required>
-            <option value="" disabled>Select Status</option>
+            <option value="" disabled>Select Role</option>
             <option value="admin">Admin</option>
             <option value="researcher">Researcher</option>
             <option value="student">Student</option>
