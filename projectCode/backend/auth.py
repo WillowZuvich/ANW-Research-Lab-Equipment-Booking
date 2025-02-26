@@ -5,9 +5,20 @@ from models import Admin, Student, Researcher
 import bcrypt
 import os
 from dotenv import load_dotenv
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 load_dotenv()
 app = FastAPI()
+
+# ✅ Add CORS Middleware to allow frontend requests
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Allow frontend access
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+)
 
 # Dependency to get database session
 def get_db():
@@ -25,23 +36,36 @@ def hash_password(password: str) -> str:
 def verify_password(plain_password, hashed_password):
     return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
-# REGISTER API
-@app.post("/api/register")
-async def register_user(firstName: str, lastName: str, email: str, phoneNumber: str, password: str, role: str, db: Session = Depends(get_db)):
-    hashed_password = hash_password(password)
+class RegisterUserRequest(BaseModel):
+    firstName: str
+    lastName: str
+    email: str
+    phoneNumber: str
+    password: str
+    role: str
 
-    if role == "admin":
-        new_user = Admin(FirstName=firstName, LastName=lastName, Email=email, PhoneNumber=phoneNumber, Password=hashed_password)
-    elif role == "student":
-        new_user = Student(FirstName=firstName, LastName=lastName, Email=email, PhoneNumber=phoneNumber, Password=hashed_password)
-    elif role == "researcher":
-        new_user = Researcher(FirstName=firstName, LastName=lastName, Email=email, PhoneNumber=phoneNumber, Password=hashed_password)
+@app.post("/api/register")
+async def register_user(user: RegisterUserRequest, db: Session = Depends(get_db)):
+    hashed_password = hash_password(user.password)
+
+    if user.role.lower() == "admin":
+        new_user = Admin(FirstName=user.firstName, LastName=user.lastName, Email=user.email, PhoneNumber=user.phoneNumber, Password=hashed_password)
+    elif user.role.lower() == "student":
+        new_user = Student(FirstName=user.firstName, LastName=user.lastName, Email=user.email, PhoneNumber=user.phoneNumber, Password=hashed_password)
+    elif user.role.lower() == "researcher":
+        new_user = Researcher(FirstName=user.firstName, LastName=user.lastName, Email=user.email, PhoneNumber=user.phoneNumber, Password=hashed_password)
     else:
         raise HTTPException(status_code=400, detail="Invalid role")
 
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+    try:
+        db.add(new_user)
+        db.commit()  # ✅ Ensure data is committed
+        db.refresh(new_user)
+        print(f" User registered: {new_user.Email}")  # Debug log
+    except Exception as e:
+        db.rollback()  #  Prevent half-saved data
+        print(f" Error inserting user: {e}")
+        raise HTTPException(status_code=500, detail="Database error")
 
     return {"message": "User registered successfully!"}
 
