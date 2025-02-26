@@ -1,6 +1,6 @@
 import sqlalchemy
 
-DATABASE_URL="mysql+mysqlconnector://root:88DogsPurple466!@45.61.62.183:3306/ResearchEquipmentDB"
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 try:
     engine = sqlalchemy.create_engine(DATABASE_URL)
