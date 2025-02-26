@@ -56,13 +56,21 @@ const Register = () => {
       const response = await fetch(`${apiUrl}/api/register`, { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        // body: JSON.stringify({
+        //   firstName: formData.firstName,
+        //   lastName: formData.lastName,
+        //   email: formData.email,
+        //   phoneNumber: formData.phoneNumber,
+        //   password: formData.password,
+        //   role: formData.role
+        // }),
         body: JSON.stringify({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          phoneNumber: formData.phoneNumber,
+          firstName: formData.firstName.trim(),  // Remove accidental spaces
+          lastName: formData.lastName.trim(),
+          email: formData.email.trim(),
+          phoneNumber: formData.phoneNumber.trim(),
           password: formData.password,
-          role: formData.role
+          role: formData.role.toLowerCase(),  // Ensure lowercase for consistency
         }),
       });
   
@@ -146,7 +154,7 @@ const Register = () => {
         </div>
         <div className="field">
           <select
-            name="statusType"
+            name="role"
             value={formData.role}
             onChange={handleChange}
             required>

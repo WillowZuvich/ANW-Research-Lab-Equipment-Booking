@@ -1,6 +1,11 @@
 # Dependency directories
 node_modules/
 bower_components/
+venv/
+
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
 
 # Log files
 npm-debug.log*

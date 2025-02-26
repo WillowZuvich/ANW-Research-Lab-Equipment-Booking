@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String
 from database import Base
 
 class Admin(Base):
-    __tablename__ = "admins"
+    __tablename__ = "Admin"
 
     AdminID = Column(Integer, primary_key=True, index=True, autoincrement=True)
     FirstName = Column(String(100), nullable=False)
@@ -12,7 +12,7 @@ class Admin(Base):
     Password = Column(String(255), nullable=False)
 
 class Student(Base):
-    __tablename__ = "students"
+    __tablename__ = "Student"
 
     StudentID = Column(Integer, primary_key=True, index=True, autoincrement=True)
     FirstName = Column(String(100), nullable=False)
@@ -22,7 +22,7 @@ class Student(Base):
     Password = Column(String(255), nullable=False)
 
 class Researcher(Base):
-    __tablename__ = "researchers"
+    __tablename__ = "Researcher"
 
     EmpID = Column(Integer, primary_key=True, index=True, autoincrement=True)
     FirstName = Column(String(100), nullable=False)
