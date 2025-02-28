@@ -1,3 +1,5 @@
+#This file handles user registration and login
+#          using bcrypt to hash passwords before storing them
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
 from database import SessionLocal
@@ -69,14 +71,19 @@ async def register_user(user: RegisterUserRequest, db: Session = Depends(get_db)
 
     return {"message": "User registered successfully!"}
 
-# LOGIN API
-@app.post("/api/login")
-async def login_user(email: str, password: str, db: Session = Depends(get_db)):
-    user = db.query(Admin).filter(Admin.Email == email).first() or \
-           db.query(Student).filter(Student.Email == email).first() or \
-           db.query(Researcher).filter(Researcher.Email == email).first()
 
-    if not user or not verify_password(password, user.Password):
+# Define a request model to accept JSON body
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+@app.post("/api/login")
+async def login_user(user: LoginRequest, db: Session = Depends(get_db)):
+    user_data = db.query(Admin).filter(Admin.Email == user.email).first() or \
+                db.query(Student).filter(Student.Email == user.email).first() or \
+                db.query(Researcher).filter(Researcher.Email == user.email).first()
+
+    if not user_data or not verify_password(user.password, user_data.Password):
         raise HTTPException(status_code=400, detail="Invalid email or password")
 
-    return {"message": "Login successful", "role": "admin" if isinstance(user, Admin) else "researcher" if isinstance(user, Researcher) else "student"}
+    return {"message": "Login successful", "role": "admin" if isinstance(user_data, Admin) else "researcher" if isinstance(user_data, Researcher) else "student"}

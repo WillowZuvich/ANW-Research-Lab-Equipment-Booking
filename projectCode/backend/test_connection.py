@@ -1,4 +1,6 @@
+# This tile ensure FastAPI can successfully connect to MySQL
 import sqlalchemy
+import os
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 

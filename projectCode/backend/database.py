@@ -1,3 +1,6 @@
+# This file connect FastAPI to MySQL using SQLAlchemy
+#           loads database credentials from .env file
+#           creates session to interact with database
 import os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine

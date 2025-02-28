@@ -7,7 +7,9 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate(); // Use useNavigate for navigation
-  const apiUrl = process.env.REACT_APP_API_URL; // Get API URL from environment variable
+
+  // ✅ Use a default API URL if process.env.REACT_APP_API_URL is undefined
+  const apiUrl = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -18,69 +20,40 @@ const Login = () => {
     }
   };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   try {
-  //     const response = await fetch(`${apiUrl}/api/login`, {  
-  //       method: 'POST',
-  //       headers: { 'Content-Type': 'application/json' },
-  //       body: JSON.stringify({ email, password }),
-  //     });
-
-  //     const data = await response.json();
-  //     if (response.ok) {
-  //       localStorage.setItem('token', data.token); // Store token for authentication
-
-  //       // Redirect based on user status
-  //       if (data.role === 'admin') {
-  //         navigate('/admin-dashboard');
-  //       } 
-  //       else if (data.role === 'researcher') {
-  //         navigate('/volunteer-dashboard');
-  //       }
-  //       else if (data.role === 'student') {
-  //         navigate('/student-dashboard');
-  //       }
-  //     } else {
-  //       alert(data.error);
-  //     }
-  //   } catch (error) {
-  //     console.error('Login failed:', error);
-  //     alert('Something went wrong. Please try again.');
-  //   }
-  // };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const apiUrl = process.env.REACT_APP_API_URL;
-  
+
     try {
       const response = await fetch(`${apiUrl}/api/login`, {  
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-  
+
       const data = await response.json();
+
       if (response.ok) {
-        localStorage.setItem('token', data.token); // Store token for authentication
+        // ✅ Store token in localStorage
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('role', data.role);
+
+        // ✅ Redirect users based on their role
         if (data.role === 'admin') {
-          navigate('/admin-dashboard');
+          navigate('/admin');
         } else if (data.role === 'researcher') {
-          navigate('/volunteer-dashboard');
+          navigate('/researcher'); // Fixed from 'volunteer-dashboard'
         } else if (data.role === 'student') {
-          navigate('/student-dashboard');
+          navigate('/student');
         }
       } else {
-        alert(data.detail);
+        // ✅ Show error message properly
+        alert(data.detail || 'Invalid login credentials.');
       }
     } catch (error) {
       console.error('Login failed:', error);
       alert('Something went wrong. Please try again.');
     }
   };
-  
 
   return (
     <div className="wrapper-login">
