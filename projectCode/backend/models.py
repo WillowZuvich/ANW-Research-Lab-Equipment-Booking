@@ -1,3 +1,4 @@
+# This file defines tables like Admin, Student, Researcher using SQLAlchemy
 from sqlalchemy import Column, Integer, String
 from database import Base
 
