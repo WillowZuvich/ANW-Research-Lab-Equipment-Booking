@@ -12,6 +12,8 @@ import StudentPage from './NavBarFunctions/StudentPage';
 import AdminPage from './NavBarFunctions/AdminPage';
 import ResearcherPage from './NavBarFunctions/ResearcherPage';
 import ProtectedRoute from './ProtectedRoute';  
+import EquipmentPage from './NavBarFunctions/EquipmentPage';
+
 import './App.css';
 
 const AppContent = () => {
@@ -33,6 +35,7 @@ const AppContent = () => {
         <Route path="/student" element={<ProtectedRoute allowedRoles={["student"]}><StudentPage /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute allowedRoles={["admin"]}><AdminPage /></ProtectedRoute>} />
         <Route path="/researcher" element={<ProtectedRoute allowedRoles={["researcher"]}><ResearcherPage /></ProtectedRoute>} />
+        <Route path="/equipment" element={<ProtectedRoute><EquipmentPage /></ProtectedRoute>} />
 
       </Routes>
     </div>
