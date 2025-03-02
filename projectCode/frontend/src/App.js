@@ -13,6 +13,7 @@ import AdminPage from './NavBarFunctions/AdminPage';
 import ResearcherPage from './NavBarFunctions/ResearcherPage';
 import ProtectedRoute from './ProtectedRoute';  
 import EquipmentPage from './NavBarFunctions/EquipmentPage';
+import AddEquipment from './NavBarFunctions/AddEquipment';
 
 import './App.css';
 
@@ -34,6 +35,7 @@ const AppContent = () => {
         {/* Protected Routes (Only accessible after login) */}
         <Route path="/student" element={<ProtectedRoute allowedRoles={["student"]}><StudentPage /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute allowedRoles={["admin"]}><AdminPage /></ProtectedRoute>} />
+        <Route path="/addequipment" element={<ProtectedRoute allowedRoles={["admin"]}><AddEquipment /></ProtectedRoute>} />
         <Route path="/researcher" element={<ProtectedRoute allowedRoles={["researcher"]}><ResearcherPage /></ProtectedRoute>} />
         <Route path="/equipment" element={<ProtectedRoute><EquipmentPage /></ProtectedRoute>} />
 
