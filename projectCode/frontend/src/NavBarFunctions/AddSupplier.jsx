@@ -36,9 +36,9 @@ const AddSupplier = () => {
   
       const data = await response.json();
       if (response.ok) {
-        alert('Supplier created succesfully. Please add equipment details.');
+        alert('Supplier created succesfully. You may now add equipment details.');
         // TODO: add add specification page
-        //navigate('/addSpecifications');
+        navigate('/addequipment');
       } else {
         alert(data.detail);
       }
@@ -51,7 +51,7 @@ const AddSupplier = () => {
  return (
       <div className="wrapper-addEquip">
         <form onSubmit={handleSubmit} className="form-addEquip">
-          <div className="title-addEquip">Add Lab Equipment</div>
+          <div className="title-addEquip">Add New Supplier</div>
           <div className="field">
             <input
               type="text"
@@ -80,7 +80,7 @@ const AddSupplier = () => {
               onChange={handleChange}
               required
             />
-            <label>Supplier Name</label>
+            <label>Supplier Phone Number</label>
           </div>
           <div className="field">
             <input type="submit" value="Submit" className="add-btn" />

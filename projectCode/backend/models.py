@@ -37,7 +37,7 @@ class Equipment(Base):
 
     EquipID = Column(Integer, primary_key=True, index=True, autoincrement=True)
     Name = Column(String(100), nullable=False)
-    Condition = Column(String(20), nullable=False)
+    Condition = Column(String(100), nullable=False)
     SupplierId = Column(Integer, ForeignKey("Supplier.SupplierId"))
 
 class Supplier(Base):

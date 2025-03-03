@@ -37,10 +37,11 @@ const AddEquipment = () => {
       const data = await response.json();
       if (response.ok) {
         alert('Equipment item created succesfully. Please add equipment details.');
-        // TODO: add add specification page
-        //navigate('/addSpecifications');
+        // TODO: Finish add specification page
+        navigate('/addSpecifications');
       } else {
         alert(data.detail);
+        navigate('/addSupplier')
       }
     } catch (error) {
       console.error('Unable to add item:', error);
