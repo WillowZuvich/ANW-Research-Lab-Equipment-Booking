@@ -128,7 +128,7 @@ class AddSupplierRequest(BaseModel):
 @app.post("/api/addsupplier")
 async def add_supplier(supplier: AddSupplierRequest, db: Session = Depends(get_db)):
     
-    new_supp = Supplier(Name=supplier.name, Email=supplier.email, PhoneNumber=supplier.email)
+    new_supp = Supplier(Name=supplier.name, Email=supplier.email, PhoneNumber=supplier.phoneNumber)
     
     try:
         db.add(new_supp)
