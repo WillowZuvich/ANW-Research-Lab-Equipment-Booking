@@ -9,6 +9,7 @@ const AdminPage = () => {
       <Link to="/equipment">Go to Equipment Page</Link>
       <p>Click below to add new Equipment:</p>
       <Link to="/addequipment">Go to Add Equipment Page</Link>
+
     </div>
   );
 };

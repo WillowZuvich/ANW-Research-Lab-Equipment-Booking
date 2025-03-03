@@ -17,6 +17,7 @@ import AddEquipment from './NavBarFunctions/AddEquipment';
 import AddSupplier from './NavBarFunctions/AddSupplier';
 import AddSpecifications from './NavBarFunctions/AddSpecifications';
 
+
 import './App.css';
 
 const AppContent = () => {
