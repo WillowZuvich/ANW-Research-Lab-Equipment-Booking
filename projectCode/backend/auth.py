@@ -3,7 +3,7 @@
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
 from database import SessionLocal
-from models import Admin, Student, Researcher
+from models import Admin, Student, Researcher, Supplier, Equipment
 import bcrypt
 import os
 from dotenv import load_dotenv
@@ -87,3 +87,58 @@ async def login_user(user: LoginRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Invalid email or password")
 
     return {"message": "Login successful", "role": "admin" if isinstance(user_data, Admin) else "researcher" if isinstance(user_data, Researcher) else "student"}
+
+
+class AddEquipRequest(BaseModel):
+    name: str
+    condition: str
+    supplierName: str
+
+@app.post("/api/addequipment")
+async def add_equip(equip: AddEquipRequest, db: Session = Depends(get_db)):
+    
+    #Query for supplier name. If not found, send back explanation message and from there go to add suplier page.
+    #Once supplier is added, automatically add item to database.
+
+    equip_supplier = db.query(Supplier).filter(Supplier.Name == equip.supplierName).first()
+
+    if not equip_supplier:
+        raise HTTPException(status_code=400, detail="Invalid supplier. Please add supplier.")
+    else:
+        new_equip = Equipment(Name=equip.name, Condition=equip.condition, SupplierId=equip_supplier.SupplierId)
+    
+        try:
+            db.add(new_equip)
+            db.commit()  # ✅ Ensure data is committed
+            db.refresh(new_equip)
+            print(f" Item registered: {new_equip.EquipID}")  # Debug log
+        except Exception as e:
+            db.rollback()  #  Prevent half-saved data
+            print(f" Error inserting user: {e}")
+            raise HTTPException(status_code=500, detail="Database error")
+
+        return {"message": "Equipment added successfully!"}
+    
+class AddSupplierRequest(BaseModel):
+    name: str
+    email: str
+    phoneNumber: str
+
+
+@app.post("/api/addsupplier")
+async def add_supplier(supplier: AddSupplierRequest, db: Session = Depends(get_db)):
+    
+    new_supp = Supplier(Name=supplier.name, Email=supplier.email, PhoneNumber=supplier.phoneNumber)
+    
+    try:
+        db.add(new_supp)
+        db.commit()  # ✅ Ensure data is committed
+        db.refresh(new_supp)
+        print(f" Supplier registered: {new_supp.SupplierId}")  # Debug log
+    except Exception as e:
+        db.rollback()  #  Prevent half-saved data
+        print(f" Error inserting user: {e}")
+        raise HTTPException(status_code=500, detail="Database error")
+
+    return {"message": "Supplier added successfully!"}
+        
