@@ -9,6 +9,10 @@ import os
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from typing import List
+from datetime import datetime
+from models import Booking
+
 
 load_dotenv()
 app = FastAPI()
@@ -141,4 +145,68 @@ async def add_supplier(supplier: AddSupplierRequest, db: Session = Depends(get_d
         raise HTTPException(status_code=500, detail="Database error")
 
     return {"message": "Supplier added successfully!"}
+
+class BookingResponse(BaseModel):
+    BookingID: int
+    Status: str
+    StartTime: str
+    EndTime: str
+
+    class Config:
+        orm_mode = True
+
+@app.get("/api/student/bookings", response_model=List[BookingResponse])
+async def get_student_bookings(student_id: int, db: Session = Depends(get_db)):
+    bookings = db.query(Booking).filter(Booking.StudentID == student_id).all()
+    
+    return [
+        BookingResponse(
+            BookingID=b.BookingID,
+            Status=b.Status,
+            StartTime=b.StartTime.strftime("%m/%d/%Y"),
+            EndTime=b.EndTime.strftime("%m/%d/%Y"),
+        )
+        for b in bookings
+    ]
+
+class EquipmentResponse(BaseModel):
+    EquipID: int
+    Name: str
+    Condition: str
+    Availability: str  # "Available" or "Booked"
+
+    class Config:
+        orm_mode = True
+
+@app.get("/api/equipment", response_model=List[EquipmentResponse])
+async def get_equipment(db: Session = Depends(get_db)):
+    equipments = db.query(Equipment).all()
+    
+    return [
+        EquipmentResponse(
+            EquipID=e.EquipID,
+            Name=e.Name,
+            Condition=e.Condition,
+            Availability="Available" if not db.query(Booking).filter(Booking.EquipmentID == e.EquipID, Booking.Status == "approved").first() else "Booked"
+        )
+        for e in equipments
+    ]
+
+@app.get("/api/equipment/{equip_id}", response_model=EquipmentResponse)
+async def get_equipment_details(equip_id: int, db: Session = Depends(get_db)):
+    equipment = db.query(Equipment).filter(Equipment.EquipID == equip_id).first()
+
+    if not equipment:
+        raise HTTPException(status_code=404, detail="Equipment not found")
+
+    return EquipmentResponse(
+        EquipID=equipment.EquipID,
+        Name=equipment.Name,
+        Condition=equipment.Condition,
+        Availability="Available" if not db.query(Booking).filter(Booking.EquipmentID == equipment.EquipID, Booking.Status == "approved").first() else "Booked",
+        Specifications=equipment.Specifications  # Ensure this field exists in your model
+    )
+
+
+
         

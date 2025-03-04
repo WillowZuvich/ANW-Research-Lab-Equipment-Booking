@@ -16,7 +16,7 @@ import EquipmentPage from './NavBarFunctions/EquipmentPage';
 import AddEquipment from './NavBarFunctions/AddEquipment';
 import AddSupplier from './NavBarFunctions/AddSupplier';
 import AddSpecifications from './NavBarFunctions/AddSpecifications';
-
+import EquipmentDetails from './NavBarFunctions/EquipmentDetails'; 
 
 import './App.css';
 
@@ -43,7 +43,8 @@ const AppContent = () => {
         <Route path="/addspecifications" element={<ProtectedRoute allowedRoles={["admin"]}><AddSpecifications /></ProtectedRoute>} />
         <Route path="/researcher" element={<ProtectedRoute allowedRoles={["researcher"]}><ResearcherPage /></ProtectedRoute>} />
         <Route path="/equipment" element={<ProtectedRoute><EquipmentPage /></ProtectedRoute>} />
-
+        <Route path="/equipment/:equipId" element={<ProtectedRoute><EquipmentDetails /></ProtectedRoute>} />
+        
       </Routes>
     </div>
   );
