@@ -200,12 +200,15 @@ async def get_equipment_details(equip_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Equipment not found")
 
     return EquipmentResponse(
-        EquipID=equipment.EquipID,
-        Name=equipment.Name,
-        Condition=equipment.Condition,
-        Availability="Available" if not db.query(Booking).filter(Booking.EquipmentID == equipment.EquipID, Booking.Status == "approved").first() else "Booked",
-        Specifications=equipment.Specifications  # Ensure this field exists in your model
-    )
+    EquipID=equipment.EquipID,
+    Name=equipment.Name,
+    Condition=equipment.Condition,
+    Availability="Available" if not db.query(Booking).filter(
+        Booking.EquipmentID == equipment.EquipID, Booking.Status
+    ).first() else "Booked",
+    Specifications=[spec.Detail for spec in equipment.specifications]  # Fetch related specifications
+)
+
 
 
 
