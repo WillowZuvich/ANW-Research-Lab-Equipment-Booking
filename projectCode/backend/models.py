@@ -35,16 +35,6 @@ class Researcher(Base):
     Password = Column(String(255), nullable=False)
     bookings = relationship("Booking", back_populates="researcher", cascade="all, delete-orphan")
 
-class Equipment(Base):
-    __tablename__ = "Equipment"
-
-    EquipID = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    Name = Column(String(100), nullable=False)
-    Condition = Column(String(100), nullable=False)
-    SupplierId = Column(Integer, ForeignKey("Supplier.SupplierId"))
-    bookings = relationship("Booking", back_populates="equipment")
-    specifications = relationship("Specification", back_populates="equipment", cascade="all, delete-orphan")
-
 class Supplier(Base):
     __tablename__ = "Supplier"
 
