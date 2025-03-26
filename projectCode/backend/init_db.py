@@ -1,3 +1,4 @@
+# This file create talbes in MySQL from the models
 from database import engine, Base
 
 # Drop tables if they exist (optional)

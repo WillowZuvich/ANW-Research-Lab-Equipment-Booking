@@ -1,12 +1,18 @@
+#This file handles user registration and login
+#          using bcrypt to hash passwords before storing them
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
 from database import SessionLocal
-from models import Admin, Student, Researcher
+from models import Admin, Student, Researcher, Supplier, Equipment
 import bcrypt
 import os
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from typing import List
+from datetime import datetime
+from models import Booking
+
 
 load_dotenv()
 app = FastAPI()
@@ -69,14 +75,141 @@ async def register_user(user: RegisterUserRequest, db: Session = Depends(get_db)
 
     return {"message": "User registered successfully!"}
 
-# LOGIN API
-@app.post("/api/login")
-async def login_user(email: str, password: str, db: Session = Depends(get_db)):
-    user = db.query(Admin).filter(Admin.Email == email).first() or \
-           db.query(Student).filter(Student.Email == email).first() or \
-           db.query(Researcher).filter(Researcher.Email == email).first()
 
-    if not user or not verify_password(password, user.Password):
+# Define a request model to accept JSON body
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+@app.post("/api/login")
+async def login_user(user: LoginRequest, db: Session = Depends(get_db)):
+    user_data = db.query(Admin).filter(Admin.Email == user.email).first() or \
+                db.query(Student).filter(Student.Email == user.email).first() or \
+                db.query(Researcher).filter(Researcher.Email == user.email).first()
+
+    if not user_data or not verify_password(user.password, user_data.Password):
         raise HTTPException(status_code=400, detail="Invalid email or password")
 
-    return {"message": "Login successful", "role": "admin" if isinstance(user, Admin) else "researcher" if isinstance(user, Researcher) else "student"}
+    return {"message": "Login successful", "role": "admin" if isinstance(user_data, Admin) else "researcher" if isinstance(user_data, Researcher) else "student"}
+
+
+class AddEquipRequest(BaseModel):
+    name: str
+    condition: str
+    supplierName: str
+
+@app.post("/api/addequipment")
+async def add_equip(equip: AddEquipRequest, db: Session = Depends(get_db)):
+    
+    #Query for supplier name. If not found, send back explanation message and from there go to add suplier page.
+    #Once supplier is added, automatically add item to database.
+
+    equip_supplier = db.query(Supplier).filter(Supplier.Name == equip.supplierName).first()
+
+    if not equip_supplier:
+        raise HTTPException(status_code=400, detail="Invalid supplier. Please add supplier.")
+    else:
+        new_equip = Equipment(Name=equip.name, Condition=equip.condition, SupplierId=equip_supplier.SupplierId)
+    
+        try:
+            db.add(new_equip)
+            db.commit()  # ✅ Ensure data is committed
+            db.refresh(new_equip)
+            print(f" Item registered: {new_equip.EquipID}")  # Debug log
+        except Exception as e:
+            db.rollback()  #  Prevent half-saved data
+            print(f" Error inserting user: {e}")
+            raise HTTPException(status_code=500, detail="Database error")
+
+        return {"message": "Equipment added successfully!"}
+    
+class AddSupplierRequest(BaseModel):
+    name: str
+    email: str
+    phoneNumber: str
+
+
+@app.post("/api/addsupplier")
+async def add_supplier(supplier: AddSupplierRequest, db: Session = Depends(get_db)):
+    
+    new_supp = Supplier(Name=supplier.name, Email=supplier.email, PhoneNumber=supplier.phoneNumber)
+    
+    try:
+        db.add(new_supp)
+        db.commit()  # ✅ Ensure data is committed
+        db.refresh(new_supp)
+        print(f" Supplier registered: {new_supp.SupplierId}")  # Debug log
+    except Exception as e:
+        db.rollback()  #  Prevent half-saved data
+        print(f" Error inserting user: {e}")
+        raise HTTPException(status_code=500, detail="Database error")
+
+    return {"message": "Supplier added successfully!"}
+
+class BookingResponse(BaseModel):
+    BookingID: int
+    Status: str
+    StartTime: str
+    EndTime: str
+
+    class Config:
+        orm_mode = True
+
+@app.get("/api/student/bookings", response_model=List[BookingResponse])
+async def get_student_bookings(student_id: int, db: Session = Depends(get_db)):
+    bookings = db.query(Booking).filter(Booking.StudentID == student_id).all()
+    
+    return [
+        BookingResponse(
+            BookingID=b.BookingID,
+            Status=b.Status,
+            StartTime=b.StartTime.strftime("%m/%d/%Y"),
+            EndTime=b.EndTime.strftime("%m/%d/%Y"),
+        )
+        for b in bookings
+    ]
+
+class EquipmentResponse(BaseModel):
+    EquipID: int
+    Name: str
+    Condition: str
+    Availability: str  # "Available" or "Booked"
+
+    class Config:
+        orm_mode = True
+
+@app.get("/api/equipment", response_model=List[EquipmentResponse])
+async def get_equipment(db: Session = Depends(get_db)):
+    equipments = db.query(Equipment).all()
+    
+    return [
+        EquipmentResponse(
+            EquipID=e.EquipID,
+            Name=e.Name,
+            Condition=e.Condition,
+            Availability="Available" if not db.query(Booking).filter(Booking.EquipmentID == e.EquipID, Booking.Status == "approved").first() else "Booked"
+        )
+        for e in equipments
+    ]
+
+@app.get("/api/equipment/{equip_id}", response_model=EquipmentResponse)
+async def get_equipment_details(equip_id: int, db: Session = Depends(get_db)):
+    equipment = db.query(Equipment).filter(Equipment.EquipID == equip_id).first()
+
+    if not equipment:
+        raise HTTPException(status_code=404, detail="Equipment not found")
+
+    return EquipmentResponse(
+        EquipID=equipment.EquipID,
+        Name=equipment.Name,
+        Condition=equipment.Condition,
+        Availability="Available" if not db.query(Booking).filter(
+            Booking.EquipmentID == equipment.EquipID, Booking.Status
+        ).first() else "Booked",
+        Specifications=[spec.Detail for spec in equipment.specifications] 
+    )
+
+
+
+
+        
