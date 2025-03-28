@@ -2,63 +2,68 @@
 
 /* Style for the entire page */
 .researcher-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    color: white;
-  }
-  
-  /* Welcome text at the top */
-  .researcher-container h2 {
-    font-size: 28px;
-    font-weight: bold;
-    color: white;
-  }
-  
-  /* Booking History */
-  .booking-section {
-    margin-top: 20px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  /* Each Booking Entry */
-  .booking-entry {
-    background-color: rgba(255, 255, 255, 0.1);
-    padding: 15px;
-    margin: 10px 0;
-    border-radius: 8px;
-    width: 350px;
-    border: 1px solid white;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  /* Booking Detail Styling */
-  .booking-entry p {
-    margin: 5px 0;
-    font-size: 16px;
-    color: white;
-    text-align: left;
-  }
-  
-  /* Explore Equipment button */
-  .explore-button {
-    background-color: #a4b2c1;
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    margin-bottom: 15px;
-    border-radius: 5px;
-  }
-  
-  .explore-button:hover {
-    background-color: #0056b3;
-  }
-  
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; 
+  padding: 20px;
+  color: rgb(96, 84, 84);
+}
+
+/* Welcome text */
+.researcher-container h2 {
+  font-size: 28px;
+  font-weight: bold;
+  color: white;
+}
+
+/* Booking History */
+.booking-section {
+  margin-top: 20px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; 
+}
+
+/* Booking Entry */
+.booking-entry {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 8px;
+  width: 300px; 
+  border: 1px solid rgb(27, 23, 23);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Booking Details */
+.booking-entry p {
+  margin: 5px 0;
+  font-size: 16px;
+  color: rgb(46, 35, 35);
+  text-align: left;
+}
+
+/* Explore Button - Now identical */
+.explore-button {
+  background-color: #a4b2c1;
+  color: rgb(67, 42, 42);
+  padding: 10px 15px; /* Matches student button padding */
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  margin-bottom: 10px; /* Matches student version */
+}
+
+.explore-button:hover {
+  background-color: #0056b3;
+}
+
+/* Additional status colors (optional but recommended) */
+.status-pending { color: #ffc107; }
+.status-approved { color: #28a745; }
+.status-denied { color: #dc3545; }
+.status-returned { color: #17a2b8; }
+.status-canceled { color: #6c757d; }

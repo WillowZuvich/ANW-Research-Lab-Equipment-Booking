@@ -8,39 +8,66 @@ const AdminPage = () => {
   const [statusUpdates, setStatusUpdates] = useState({});
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchBookings();
-  }, []);
+  // Helper function: Return a color for each status
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Pending Request":
+        return "orange";
+      case "Approved":
+        return "green";
+      case "Denied":
+        return "red";
+      case "Returned":
+        return "blue";
+      case "Booking Canceled":
+        return "gray";
+      default:
+        return "black";
+    }
+  };
 
+  // Fetch all bookings for the admin view
   const fetchBookings = async () => {
     try {
       setLoading(true);
       const apiUrl = process.env.REACT_APP_API_URL;
       const response = await axios.get(`${apiUrl}/api/admin/bookings`);
+      console.log("Fetched bookings:", response.data);
       setBookings(response.data);
     } catch (error) {
-      console.error("Error fetching booking requests:", error);
+      console.error("Full error:", error);
+      console.error("Error response:", error.response?.data);
     } finally {
       setLoading(false);
     }
   };
 
+  // Handle changes to the status dropdown for a specific booking
   const handleStatusChange = (bookingId, newStatus) => {
-    setStatusUpdates((prev) => ({ ...prev, [bookingId]: newStatus }));
+    setStatusUpdates((prev) => ({
+      ...prev,
+      [bookingId]: newStatus,
+    }));
   };
 
+  // Submit the new status (Approve or Deny)
   const handleSubmitStatus = async (bookingId) => {
     const newStatus = statusUpdates[bookingId];
     if (!newStatus) {
       alert("Please select a status");
       return;
     }
+
     try {
       const apiUrl = process.env.REACT_APP_API_URL;
       await axios.put(`${apiUrl}/api/bookings/${bookingId}/status`, {
         status: newStatus,
-        admin_action: newStatus === "Approved" ? "Approved by admin" : "Denied by admin"
+        admin_action:
+          newStatus === "Approved"
+            ? "Approved by admin"
+            : "Denied by admin",
       });
+      // Refresh the list to show updated status
       fetchBookings();
     } catch (error) {
       console.error("Error updating booking status:", error);
@@ -48,10 +75,12 @@ const AdminPage = () => {
     }
   };
 
+  // Mark the equipment as returned
   const handleReturnEquipment = async (bookingId) => {
     try {
       const apiUrl = process.env.REACT_APP_API_URL;
       await axios.put(`${apiUrl}/api/bookings/${bookingId}/return`);
+      // Refresh to see updated status
       fetchBookings();
     } catch (error) {
       console.error("Error returning equipment:", error);
@@ -59,21 +88,16 @@ const AdminPage = () => {
     }
   };
 
-  const getStatusColor = (status) => {
-    switch(status) {
-      case "Pending Request": return "orange";
-      case "Approved": return "green";
-      case "Denied": return "red";
-      case "Returned": return "blue";
-      case "Booking Canceled": return "gray";
-      default: return "black";
-    }
-  };
+  // Fetch bookings on component mount
+  useEffect(() => {
+    fetchBookings();
+  }, []);
 
   return (
     <div className="admin-container">
       <h1>Admin Dashboard</h1>
-      
+
+      {/* Admin actions at the top */}
       <div className="admin-actions">
         <Link to="/equipment" className="admin-link">
           Manage Equipment
@@ -84,6 +108,8 @@ const AdminPage = () => {
       </div>
 
       <h2>Booking Requests</h2>
+
+      {/* Loading indicator */}
       {loading ? (
         <p>Loading bookings...</p>
       ) : bookings.length === 0 ? (
@@ -94,6 +120,7 @@ const AdminPage = () => {
             <thead>
               <tr>
                 <th>Booking ID</th>
+                <th>Requester</th>
                 <th>Equipment</th>
                 <th>Request Date</th>
                 <th>Status</th>
@@ -104,24 +131,39 @@ const AdminPage = () => {
               {bookings.map((booking) => (
                 <tr key={booking.BookingID}>
                   <td>{booking.BookingID}</td>
+
+                  {/* Show requester's name if available */}
+                  <td>
+                    {booking.requester_info ? (
+                      `${booking.requester_info.name || "Unknown"} (${booking.requester_info.role || "unknown"})`
+                    ) : (
+                      "System booking"
+                    )}
+                  </td>
+
                   <td>{booking.EquipmentName}</td>
                   <td>{booking.RequestDate}</td>
+
                   <td style={{ color: getStatusColor(booking.Status) }}>
                     {booking.Status}
                   </td>
+
                   <td className="actions-cell">
+                    {/* Pending Request => Show dropdown to Approve or Deny */}
                     {booking.Status === "Pending Request" && (
                       <>
                         <select
                           value={statusUpdates[booking.BookingID] || ""}
-                          onChange={(e) => handleStatusChange(booking.BookingID, e.target.value)}
+                          onChange={(e) =>
+                            handleStatusChange(booking.BookingID, e.target.value)
+                          }
                           className="status-select"
                         >
                           <option value="">Select Action</option>
                           <option value="Approved">Approve</option>
                           <option value="Denied">Deny</option>
                         </select>
-                        <button 
+                        <button
                           onClick={() => handleSubmitStatus(booking.BookingID)}
                           className="status-button"
                         >
@@ -129,10 +171,12 @@ const AdminPage = () => {
                         </button>
                       </>
                     )}
+
+                    {/* Approved => Show "Mark Returned" button */}
                     {booking.Status === "Approved" && (
-                      <button 
+                      <button
                         onClick={() => handleReturnEquipment(booking.BookingID)}
-                        className="return-button"
+                        className="mark-return-button"
                       >
                         Mark Returned
                       </button>

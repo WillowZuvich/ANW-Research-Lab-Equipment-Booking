@@ -1,3 +1,4 @@
+# models.py
 # This file defines tables like Admin, Student, Researcher using SQLAlchemy
 #           and creates a Base class for models to inherit from
 from sqlalchemy import Column, Integer, String, DateTime, TIMESTAMP, ForeignKey
@@ -77,3 +78,4 @@ class Equipment(Base):
     SupplierId = Column(Integer, ForeignKey("Supplier.SupplierId"))
     specifications = relationship("Specification", back_populates="equipment", cascade="all, delete-orphan")
     bookings = relationship("Booking", back_populates="equipment")
+

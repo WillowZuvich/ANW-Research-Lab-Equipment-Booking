@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
+import ReturnButton from "./ReturnButton";
 import "./StudentPage.css";
 
 const StudentPage = () => {
@@ -40,15 +41,21 @@ const StudentPage = () => {
     }
     try {
       const apiUrl = process.env.REACT_APP_API_URL;
-      await axios.put(`${apiUrl}/api/bookings/${bookingId}/cancel`);
-      setBookings(bookings.map(b => 
-        b.BookingID === bookingId ? {...b, Status: "Booking Canceled"} : b
-      ));
+      const response = await axios.put(
+        `${apiUrl}/api/bookings/${bookingId}/cancel?user_type=student`
+      );
+      setBookings(
+        bookings.map((b) =>
+          b.BookingID === bookingId ? { ...b, Status: "Booking Canceled" } : b
+        )
+      );
+      alert(response.data.message);
     } catch (error) {
       console.error("Error cancelling booking:", error);
       alert(error.response?.data?.detail || "Error cancelling booking");
     }
   };
+  
 
   const getStatusDisplay = (status) => {
     switch(status) {
@@ -74,55 +81,59 @@ const StudentPage = () => {
 
   return (
     <div className="student-container">
-      <h2>Student Dashboard</h2>
+      <ReturnButton />
+      <h2>Welcome, Student!</h2>
       
-      <Link to="/equipment" className="explore-button">
-        Browse Available Equipment
+      <Link to="/equipment">
+        <button className="explore-button">Explore Equipment</button>
       </Link>
 
       <div className="booking-history">
-        <h3>Your Booking History</h3>
+        <h3>Booking History</h3>
         
-        {loading ? (
-          <p>Loading your bookings...</p>
-        ) : bookings.length === 0 ? (
-          <p>You haven't made any bookings yet.</p>
+        {bookings.length === 0 ? (
+          <p>No bookings found.</p>
         ) : (
-          <div className="booking-cards">
-            {bookings.map((booking) => (
-              <div 
-                key={booking.BookingID} 
-                className="booking-card"
-                style={{ borderLeft: `5px solid ${getStatusColor(booking.Status)}`}}
-              >
-                <div className="booking-header">
-                  <h4>{booking.EquipmentName}</h4>
-                  <span 
-                    className="booking-status"
-                    style={{ color: getStatusColor(booking.Status) }}
-                  >
-                    {getStatusDisplay(booking.Status)}
-                  </span>
-                </div>
-                
-                <div className="booking-details">
-                  <p><strong>Requested:</strong> {booking.RequestDate}</p>
-                  {booking.StartTime && <p><strong>Start Time:</strong> {booking.StartTime}</p>}
-                  {booking.EndTime && <p><strong>End Time:</strong> {booking.EndTime}</p>}
-                  {booking.AdminAction && <p><strong>Admin Note:</strong> {booking.AdminAction}</p>}
-                </div>
-
-                {(booking.Status === "Pending Request" || 
-                  booking.Status === "Approved") && (
-                  <button
-                    onClick={() => handleCancelBooking(booking.BookingID)}
-                    className="cancel-button"
-                  >
-                    Cancel Booking
-                  </button>
-                )}
-              </div>
-            ))}
+          <div className="bookings-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Equipment</th>
+                  <th>Status</th>
+                  <th>Start Date</th>
+                  <th>End Date</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {bookings.map((booking) => (
+                  <tr key={booking.BookingID}>
+                    <td>{booking.EquipmentName}</td>
+                    <td>{getStatusDisplay(booking.Status)}</td>
+                    <td>
+                      {["Approved", "Returned"].includes(booking.Status) 
+                        ? new Date(booking.StartTime).toLocaleString() 
+                        : "N/A"}
+                    </td>
+                    <td>
+                      {booking.Status === "Returned" 
+                        ? new Date(booking.EndTime).toLocaleString() 
+                        : "N/A"}
+                    </td>
+                    <td>
+                      {["Pending Request", "Approved", "Denied"].includes(booking.Status) && (
+                        <button
+                          onClick={() => handleCancelBooking(booking.BookingID)}
+                          className="cancel-button"
+                        >
+                          Cancel Booking
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>

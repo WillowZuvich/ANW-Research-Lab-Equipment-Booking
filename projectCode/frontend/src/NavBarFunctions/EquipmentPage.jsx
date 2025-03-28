@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import ReturnButton from "./ReturnButton";
 import "./EquipmentPage.css";
 
 const EquipmentPage = () => {
@@ -42,6 +43,7 @@ const EquipmentPage = () => {
 
   return (
     <div className="equipment-container">
+      <ReturnButton />
       <h2>Equipment List</h2>
       {userRole === "admin" && (
         <Link to="/add-equipment" className="add-equipment-btn">

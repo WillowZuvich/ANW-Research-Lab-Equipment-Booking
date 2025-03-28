@@ -35,7 +35,7 @@
   }
   
   .availability-badge.booked {
-    background-color: #e74c3c;
+    background-color: #f0eded;
     color: white;
   }
   
@@ -69,7 +69,7 @@
   
   .book-button {
     background-color: #3498db;
-    color: white;
+    color: rgb(219, 212, 212);
     border: none;
     padding: 0.8rem 1.5rem;
     border-radius: 4px;
@@ -80,7 +80,7 @@
   }
   
   .book-button:hover {
-    background-color: #2980b9;
+    background-color: #8598a5;
   }
   
   .book-button:disabled {
@@ -97,7 +97,7 @@
   .not-found {
     text-align: center;
     padding: 2rem;
-    color: #e74c3c;
+    color: #eadfde;
   }
   
   /* Responsive design */

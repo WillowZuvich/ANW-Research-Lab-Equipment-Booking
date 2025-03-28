@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import ReturnButton from "./ReturnButton";
 import "./EquipmentDetails.css";
 
 const EquipmentDetails = () => {
@@ -9,7 +10,7 @@ const EquipmentDetails = () => {
   const [equipment, setEquipment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isRequesting, setIsRequesting] = useState(false);
-  const studentId = localStorage.getItem("userId");
+  const userId = localStorage.getItem("userId");
   const userRole = localStorage.getItem("role");
 
   useEffect(() => {
@@ -29,23 +30,24 @@ const EquipmentDetails = () => {
   }, [equipId]);
 
   const handleRequestBooking = async () => {
-    if (!studentId || userRole !== "student") {
-      alert("Please log in as a student to book equipment.");
+    if (!userId || (userRole !== "student" && userRole !== "researcher")) {
+      alert("Please log in to book equipment.");
       navigate("/login");
       return;
     }
-
+  
     setIsRequesting(true);
     try {
       const apiUrl = process.env.REACT_APP_API_URL;
-      await axios.post(`${apiUrl}/api/bookings`, {
-        student_id: parseInt(studentId),
+      const response = await axios.post(`${apiUrl}/api/bookings`, {
+        user_id: parseInt(userId),
         equipment_id: parseInt(equipId),
+        user_type: userRole
       });
       alert("Booking request submitted successfully!");
-      navigate("/student");
+      navigate(`/${userRole}`);
     } catch (error) {
-      console.error("Error sending booking request:", error);
+      console.error("Error:", error.response?.data);
       alert(error.response?.data?.detail || "Error sending booking request");
     } finally {
       setIsRequesting(false);
@@ -57,6 +59,7 @@ const EquipmentDetails = () => {
 
   return (
     <div className="equipment-details-container">
+        <ReturnButton />
       <div className="equipment-header">
         <h2>{equipment.Name}</h2>
         <span className={`availability-badge ${equipment.Availability.toLowerCase()}`}>
@@ -79,7 +82,7 @@ const EquipmentDetails = () => {
         )}
       </div>
 
-      {userRole === "student" && equipment.Availability === "Available" && (
+      {(userRole === "student" || userRole === "researcher") && equipment.Availability === "Available" && (
         <button 
           onClick={handleRequestBooking}
           disabled={isRequesting}
