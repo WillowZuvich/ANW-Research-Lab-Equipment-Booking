@@ -50,18 +50,18 @@
 .explore-button {
   background-color: #a4b2c1;
   color: rgb(67, 42, 42);
-  padding: 10px 15px; /* Matches student button padding */
+  padding: 10px 15px;
   border: none;
   cursor: pointer;
   font-size: 16px;
-  margin-bottom: 10px; /* Matches student version */
+  margin-bottom: 10px; 
 }
 
 .explore-button:hover {
   background-color: #0056b3;
 }
 
-/* Additional status colors (optional but recommended) */
+/* Additional status colors */
 .status-pending { color: #ffc107; }
 .status-approved { color: #28a745; }
 .status-denied { color: #dc3545; }
