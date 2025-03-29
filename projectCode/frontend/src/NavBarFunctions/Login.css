@@ -168,6 +168,11 @@ input[type="password"] {
   /* Make the button text bold */
 }
 
+.auth-btn-login:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 .auth-btn-login:hover {
   /* Hover effect for login button */
   background-color: #cd7a61;

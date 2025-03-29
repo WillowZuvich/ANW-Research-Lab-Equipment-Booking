@@ -1,29 +1,33 @@
-#This file handles user registration and login
-#          using bcrypt to hash passwords before storing them
-from fastapi import FastAPI, HTTPException, Depends
+# auth.py
+# Description: This file contains the backend code for the authentication system.
+# using bcrypt to hash passwords before storing them
+from fastapi import FastAPI, HTTPException, Depends, Query
 from sqlalchemy.orm import Session
 from database import SessionLocal
-from models import Admin, Student, Researcher, Supplier, Equipment
-import bcrypt
+from models import Admin, Student, Researcher, Supplier, Equipment, Booking
+import bcrypt # type: ignore
 import os
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional, ForwardRef
 from datetime import datetime
-from models import Booking
-
+from enum import Enum
+from sqlalchemy.orm import joinedload
 
 load_dotenv()
 app = FastAPI()
 
-# ✅ Add CORS Middleware to allow frontend requests
+# Add CORS Middleware to allow frontend requests
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Allow frontend access
+    allow_origins=[
+        "http://localhost:3000",  # Your React frontend
+    ],
     allow_credentials=True,
-    allow_methods=["*"],  # Allow all HTTP methods
-    allow_headers=["*"],  # Allow all headers
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+    expose_headers=["*"]  # Needed for some browsers
 )
 
 # Dependency to get database session
@@ -65,7 +69,7 @@ async def register_user(user: RegisterUserRequest, db: Session = Depends(get_db)
 
     try:
         db.add(new_user)
-        db.commit()  # ✅ Ensure data is committed
+        db.commit()  # Ensure data is committed
         db.refresh(new_user)
         print(f" User registered: {new_user.Email}")  # Debug log
     except Exception as e:
@@ -76,10 +80,10 @@ async def register_user(user: RegisterUserRequest, db: Session = Depends(get_db)
     return {"message": "User registered successfully!"}
 
 
-# Define a request model to accept JSON body
 class LoginRequest(BaseModel):
     email: str
     password: str
+
 
 @app.post("/api/login")
 async def login_user(user: LoginRequest, db: Session = Depends(get_db)):
@@ -90,7 +94,14 @@ async def login_user(user: LoginRequest, db: Session = Depends(get_db)):
     if not user_data or not verify_password(user.password, user_data.Password):
         raise HTTPException(status_code=400, detail="Invalid email or password")
 
-    return {"message": "Login successful", "role": "admin" if isinstance(user_data, Admin) else "researcher" if isinstance(user_data, Researcher) else "student"}
+    if isinstance(user_data, Admin):
+        return {"message": "Login successful", "role": "admin", "userId": user_data.AdminID}
+    elif isinstance(user_data, Researcher):
+        return {"message": "Login successful", "role": "researcher", "userId": user_data.EmpID}
+    else:
+        # Student
+        return {"message": "Login successful", "role": "student", "userId": user_data.StudentID}
+
 
 
 class AddEquipRequest(BaseModel):
@@ -100,9 +111,6 @@ class AddEquipRequest(BaseModel):
 
 @app.post("/api/addequipment")
 async def add_equip(equip: AddEquipRequest, db: Session = Depends(get_db)):
-    
-    #Query for supplier name. If not found, send back explanation message and from there go to add suplier page.
-    #Once supplier is added, automatically add item to database.
 
     equip_supplier = db.query(Supplier).filter(Supplier.Name == equip.supplierName).first()
 
@@ -113,11 +121,11 @@ async def add_equip(equip: AddEquipRequest, db: Session = Depends(get_db)):
     
         try:
             db.add(new_equip)
-            db.commit()  # ✅ Ensure data is committed
+            db.commit() 
             db.refresh(new_equip)
-            print(f" Item registered: {new_equip.EquipID}")  # Debug log
+            print(f" Item registered: {new_equip.EquipID}")  
         except Exception as e:
-            db.rollback()  #  Prevent half-saved data
+            db.rollback()  
             print(f" Error inserting user: {e}")
             raise HTTPException(status_code=500, detail="Database error")
 
@@ -136,9 +144,9 @@ async def add_supplier(supplier: AddSupplierRequest, db: Session = Depends(get_d
     
     try:
         db.add(new_supp)
-        db.commit()  # ✅ Ensure data is committed
+        db.commit()  
         db.refresh(new_supp)
-        print(f" Supplier registered: {new_supp.SupplierId}")  # Debug log
+        print(f" Supplier registered: {new_supp.SupplierId}")  
     except Exception as e:
         db.rollback()  #  Prevent half-saved data
         print(f" Error inserting user: {e}")
@@ -146,11 +154,20 @@ async def add_supplier(supplier: AddSupplierRequest, db: Session = Depends(get_d
 
     return {"message": "Supplier added successfully!"}
 
+class RequesterInfo(BaseModel):
+    role: str  # "student" or "researcher"
+    id: int
+    name: str
+
 class BookingResponse(BaseModel):
     BookingID: int
     Status: str
-    StartTime: str
-    EndTime: str
+    EquipmentName: str  
+    RequestDate: Optional[str] = None  # Now optional
+    StartTime: Optional[str] = None    # Now optional
+    EndTime: Optional[str] = None      # Now optional
+    AdminAction: Optional[str] = None  # Now optional
+    requester_info: Optional[RequesterInfo] = None  
 
     class Config:
         orm_mode = True
@@ -158,36 +175,237 @@ class BookingResponse(BaseModel):
 @app.get("/api/student/bookings", response_model=List[BookingResponse])
 async def get_student_bookings(student_id: int, db: Session = Depends(get_db)):
     bookings = db.query(Booking).filter(Booking.StudentID == student_id).all()
-    
     return [
         BookingResponse(
             BookingID=b.BookingID,
             Status=b.Status,
-            StartTime=b.StartTime.strftime("%m/%d/%Y"),
-            EndTime=b.EndTime.strftime("%m/%d/%Y"),
+            EquipmentName=b.equipment.Name,
+            RequestDate=b.RequestDate.strftime("%m/%d/%Y %H:%M:%S") if b.RequestDate else "",
+            StartTime=b.StartTime.strftime("%m/%d/%Y %H:%M:%S") if b.StartTime else "",
+            EndTime=b.EndTime.strftime("%m/%d/%Y %H:%M:%S") if b.EndTime else "",
+            AdminAction=b.AdminAction or ""
         )
         for b in bookings
     ]
+
+
+
+@app.get("/api/admin/bookings", response_model=List[BookingResponse])
+async def get_all_bookings(db: Session = Depends(get_db)):
+    bookings = db.query(Booking).options(
+        joinedload(Booking.student),
+        joinedload(Booking.researcher),
+        joinedload(Booking.equipment)
+    ).all()
+
+    results = []
+    for b in bookings:
+        # Handle null equipment case
+        equipment_name = b.equipment.Name if b.equipment else "Unknown Equipment"
+        
+        # Build requester info only if exists
+        # requester_info = None
+        if b.student:
+            requester_info = RequesterInfo(
+                role="student",
+                id=b.student.StudentID,
+                name=f"{b.student.FirstName} {b.student.LastName}"
+            )
+        elif b.researcher:
+            requester_info = RequesterInfo(
+                role="researcher",
+                id=b.researcher.EmpID,
+                name=f"{b.researcher.FirstName} {b.researcher.LastName}"
+            )
+
+        results.append(BookingResponse(
+            BookingID=b.BookingID,
+            Status=b.Status,
+            EquipmentName=equipment_name,
+            RequestDate=b.RequestDate.isoformat() if b.RequestDate else None,
+            StartTime=b.StartTime.isoformat() if b.StartTime else None,
+            EndTime=b.EndTime.isoformat() if b.EndTime else None,
+            AdminAction=b.AdminAction,
+            requester_info=requester_info.dict() if requester_info else None
+        ))
+    
+    return results
+
+
+@app.get("/api/researcher/bookings", response_model=List[BookingResponse])
+async def get_researcher_bookings(researcher_id: int, db: Session = Depends(get_db)):
+    bookings = db.query(Booking).filter(Booking.ResearcherID == researcher_id).all()
+    return [
+        BookingResponse(
+            BookingID=b.BookingID,
+            Status=b.Status,
+            EquipmentName=b.equipment.Name,
+            RequestDate=b.RequestDate.strftime("%m/%d/%Y %H:%M:%S") if b.RequestDate else "",
+            StartTime=b.StartTime.strftime("%m/%d/%Y %H:%M:%S") if b.StartTime else "",
+            EndTime=b.EndTime.strftime("%m/%d/%Y %H:%M:%S") if b.EndTime else "",
+            AdminAction=b.AdminAction or ""
+        )
+        for b in bookings
+    ]
+
+class CreateBookingRequest(BaseModel):
+    user_id: int  # Generic field that can be StudentID or ResearcherID
+    equipment_id: int
+    user_type: str  # "student" or "researcher"
+
+@app.post("/api/bookings")
+async def create_booking(request: CreateBookingRequest, db: Session = Depends(get_db)):
+    # Check equipment exists
+    if not db.query(Equipment).filter(Equipment.EquipID == request.equipment_id).first():
+        raise HTTPException(status_code=404, detail="Equipment not found")
+
+    # Validate user type
+    if request.user_type not in ["student", "researcher"]:
+        raise HTTPException(status_code=400, detail="Invalid user type")
+
+    # Check user exists
+    if request.user_type == "student":
+        if not db.query(Student).filter(Student.StudentID == request.user_id).first():
+            raise HTTPException(status_code=404, detail="Student not found")
+    else:
+        if not db.query(Researcher).filter(Researcher.EmpID == request.user_id).first():
+            raise HTTPException(status_code=404, detail="Researcher not found")
+        
+    # Validating booking request:
+    if request.user_type == "student" and db.query(Booking).filter(
+        Booking.StudentID == request.user_id,
+        Booking.EquipmentID == request.equipment_id,
+        Booking.Status.in_(["Pending Request", "Approved"])
+    ).first():
+        raise HTTPException(status_code=400, detail="Duplicate booking request")
+
+    # Create booking
+    booking_data = {
+        "EquipmentID": request.equipment_id,
+        "Status": "Pending Request",
+        "RequestDate": datetime.utcnow()
+    }
+
+    if request.user_type == "student":
+        booking_data["StudentID"] = request.user_id
+    else:
+        booking_data["ResearcherID"] = request.user_id
+
+    new_booking = Booking(**booking_data)
+
+    try:
+        db.add(new_booking)
+        db.commit()
+        db.refresh(new_booking)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Error creating booking")
+    
+    return {"message": "Booking request created successfully", "booking_id": new_booking.BookingID}
+
+class UpdateBookingStatusRequest(BaseModel):
+    status: str  # Should be "Approved" or "Denied"
+    admin_action: str  # Add this field
+
+class BookingStatus:
+    PENDING = "Pending Request"
+    APPROVED = "Approved"
+    DENIED = "Denied"
+    RETURNED = "Returned"
+    CANCELED = "Booking Canceled"
+
+@app.put("/api/bookings/{booking_id}/status")
+async def update_booking_status(booking_id: int, request: UpdateBookingStatusRequest, db: Session = Depends(get_db)):
+    booking = db.query(Booking).filter(Booking.BookingID == booking_id).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    if request.status not in ["Approved", "Denied"]:
+        raise HTTPException(status_code=400, detail="Invalid status. Must be 'Approved' or 'Denied'")
+    
+    booking.Status = "Approved" if request.status == "Approved" else "Denied"
+    booking.AdminAction = request.status
+    booking.ApprovalDate = datetime.utcnow()
+    
+    if request.status == "Approved":
+        booking.StartTime = datetime.utcnow()  # Set start time when approved
+    else:
+        booking.StartTime = None
+        booking.EndTime = None
+    
+    db.commit()
+    return {"message": f"Booking status updated to {booking.Status}"}
+
+@app.put("/api/bookings/{booking_id}/return")
+async def return_equipment(booking_id: int, db: Session = Depends(get_db)):
+    booking = db.query(Booking).filter(Booking.BookingID == booking_id).first()
+    if not booking:
+        raise HTTPException(404, "Booking not found")
+    
+    booking.Status = "Returned"
+    booking.EndTime = datetime.utcnow()
+    db.commit()
+    return {"message": "Equipment returned successfully"}
+
+class UserType(str, Enum):
+    student = "student"
+    researcher = "researcher"
+
+# Cancel booking endpoint
+@app.put("/api/bookings/{booking_id}/cancel")
+async def cancel_booking(
+    booking_id: int, 
+    user_type: UserType = Query(..., description="Type of user: 'student' or 'researcher'"),
+    db: Session = Depends(get_db)
+):
+    booking = db.query(Booking).filter(Booking.BookingID == booking_id).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    # Additional validation to ensure the canceler owns the booking
+    if user_type == "student" and booking.StudentID is None:
+        raise HTTPException(status_code=403, detail="This booking doesn't belong to a student")
+    elif user_type == "researcher" and booking.ResearcherID is None:
+        raise HTTPException(status_code=403, detail="This booking doesn't belong to a researcher")
+    
+    booking.Status = "Booking Canceled"
+    booking.StartTime = None
+    booking.EndTime = None
+    
+    db.commit()
+    return {
+        "message": "Booking has been canceled",
+        "booking_id": booking_id,
+        "new_status": booking.Status,
+        "equipment_id": booking.EquipmentID
+    }
 
 class EquipmentResponse(BaseModel):
     EquipID: int
     Name: str
     Condition: str
-    Availability: str  # "Available" or "Booked"
+    Availability: str
+    Specifications: List[str] = []  
 
     class Config:
         orm_mode = True
 
 @app.get("/api/equipment", response_model=List[EquipmentResponse])
 async def get_equipment(db: Session = Depends(get_db)):
-    equipments = db.query(Equipment).all()
+    equipments = db.query(Equipment).options(
+        joinedload(Equipment.specifications)  # Eager load specifications
+    ).all()
     
     return [
         EquipmentResponse(
             EquipID=e.EquipID,
             Name=e.Name,
             Condition=e.Condition,
-            Availability="Available" if not db.query(Booking).filter(Booking.EquipmentID == e.EquipID, Booking.Status == "approved").first() else "Booked"
+            Availability="Available" if not db.query(Booking).filter(
+                Booking.EquipmentID == e.EquipID, 
+                Booking.Status.in_(["Approved", "Pending Request"])
+            ).first() else "Booked",
+            Specifications=[spec.Detail for spec in e.specifications]  # Now matches model
         )
         for e in equipments
     ]
@@ -204,12 +422,14 @@ async def get_equipment_details(equip_id: int, db: Session = Depends(get_db)):
         Name=equipment.Name,
         Condition=equipment.Condition,
         Availability="Available" if not db.query(Booking).filter(
-            Booking.EquipmentID == equipment.EquipID, Booking.Status
+            Booking.EquipmentID == equipment.EquipID, 
+            Booking.Status.in_([BookingStatus.APPROVED, BookingStatus.PENDING])
         ).first() else "Booked",
-        Specifications=[spec.Detail for spec in equipment.specifications] 
+        Specifications=[spec.Detail for spec in equipment.specifications]
     )
 
 
 
 
         
+

@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import ReturnButton from "./ReturnButton";
 import "./EquipmentPage.css";
-
 
 const EquipmentPage = () => {
   const [equipment, setEquipment] = useState([]);
-  const [filters, setFilters] = useState({ name: "", condition: "", availability: "" });
+  const [filters, setFilters] = useState({ 
+    name: "", 
+    condition: "", 
+    availability: "" 
+  });
+  const userRole = localStorage.getItem("role");
 
   useEffect(() => {
     const fetchEquipment = async () => {
@@ -32,9 +37,19 @@ const EquipmentPage = () => {
     (filters.availability === "" || eq.Availability === filters.availability)
   );
 
+  const getAvailabilityColor = (availability) => {
+    return availability === "Available" ? "green" : "red";
+  };
+
   return (
     <div className="equipment-container">
+      <ReturnButton />
       <h2>Equipment List</h2>
+      {userRole === "admin" && (
+        <Link to="/add-equipment" className="add-equipment-btn">
+          Add New Equipment
+        </Link>
+      )}
   
       <div className="equipment-filters">
         <input
@@ -48,6 +63,7 @@ const EquipmentPage = () => {
           <option value="">All Conditions</option>
           <option value="New">New</option>
           <option value="Used">Used</option>
+          <option value="Damaged">Damaged</option>
         </select>
         <select name="availability" value={filters.availability} onChange={handleFilterChange}>
           <option value="">All Availability</option>
@@ -56,18 +72,21 @@ const EquipmentPage = () => {
         </select>
       </div>
   
-      <ul className="equipment-list">
+      <div className="equipment-list">
         {filteredEquipment.map((eq) => (
-          <li key={eq.EquipID} className="equipment-item">
-            <a href={`/equipment/${eq.EquipID}`} style={{ color: "white" }}>
-              {eq.Name}
-            </a> - {eq.Condition} - {eq.Availability}
-          </li>
+          <div key={eq.EquipID} className="equipment-card">
+            <Link to={`/equipment/${eq.EquipID}`} className="equipment-link">
+              <h3>{eq.Name}</h3>
+              <p>Condition: {eq.Condition}</p>
+              <p style={{ color: getAvailabilityColor(eq.Availability) }}>
+                Status: {eq.Availability}
+              </p>
+            </Link>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
-  
 };
 
 export default EquipmentPage;
