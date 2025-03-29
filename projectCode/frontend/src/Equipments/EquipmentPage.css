@@ -2,7 +2,7 @@
 
 /* Style for the Equipment List Title */
 .equipment-container {
-    color: white; /* Ensure all text inside is white */
+    color: rgb(221, 207, 207); /* Ensure all text inside is white */
   }
   
   /* Style for each Equipment Item */
@@ -15,7 +15,7 @@
   /* Ensure Filter Inputs and Dropdowns are visible */
   .equipment-filters input,
   .equipment-filters select {
-    color: black; /* Text inside inputs should remain readable */
+    color: rgb(58, 35, 35); /* Text inside inputs should remain readable */
     background-color: white;
     padding: 5px;
     margin-right: 10px;

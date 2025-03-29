@@ -1,14 +1,14 @@
 // Login.jsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import './Login.css'; // Use the shared CSS file
+import './Login.css'; 
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const navigate = useNavigate(); // Use useNavigate for navigation
+  const navigate = useNavigate(); 
 
-  // ✅ Use a default API URL if process.env.REACT_APP_API_URL is undefined
+  //  Use a default API URL if process.env.REACT_APP_API_URL is undefined
   const apiUrl = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
 
   const handleChange = (e) => {
@@ -33,11 +33,11 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // ✅ Store token in localStorage
+        // Store token in localStorage
         localStorage.setItem('token', data.token);
         localStorage.setItem('role', data.role);
 
-        // ✅ Redirect users based on their role
+        // Redirect users based on their role
         if (data.role === 'admin') {
           navigate('/admin');
         } else if (data.role === 'researcher') {
@@ -46,7 +46,7 @@ const Login = () => {
           navigate('/student');
         }
       } else {
-        // ✅ Show error message properly
+        // Show error message properly
         alert(data.detail || 'Invalid login credentials.');
       }
     } catch (error) {
@@ -88,3 +88,4 @@ const Login = () => {
 };
 
 export default Login;
+

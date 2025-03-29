@@ -4,16 +4,16 @@
 .student-container {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: flex-start; 
     padding: 20px;
-    color: white; /* Set text color to white */
+    color: rgb(96, 84, 84);
   }
   
   /* Welcome text at the top */
   .student-container h2 {
     font-size: 28px;
     font-weight: bold;
-    color: white; /* Ensure it's visible */
+    color: white; 
   }
   
   /* Booking History */
@@ -31,25 +31,25 @@
     padding: 15px;
     margin: 10px 0;
     border-radius: 8px;
-    width: 300px;
-    border: 1px solid white;
+    width: 300px; 
+    border: 1px solid rgb(27, 23, 23);
     display: flex;
-    flex-direction: column; /* Ensure content is stacked vertically */
-    gap: 10px; /* Add spacing between details */
+    flex-direction: column;
+    gap: 10px; 
   }
   
  /* Booking Detail Styling */
   .booking-entry p {
     margin: 5px 0;
     font-size: 16px;
-    color: white;
-    text-align: left; /* Ensure left-aligned text inside each entry */
+    color: rgb(46, 35, 35);
+    text-align: left;
   }
   
   /* Explore Equipment button */
   .explore-button {
     background-color: #a4b2c1;
-    color: white;
+    color: rgb(67, 42, 42);
     padding: 10px 15px;
     border: none;
     cursor: pointer;
@@ -61,3 +61,9 @@
     background-color: #0056b3;
   }
   
+  /* Additional status colors */
+.status-pending { color: #ffc107; }
+.status-approved { color: #28a745; }
+.status-denied { color: #dc3545; }
+.status-returned { color: #17a2b8; }
+.status-canceled { color: #6c757d; }
