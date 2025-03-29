@@ -8,15 +8,15 @@ import About from './NavBarFunctions/About';
 import Login from './NavBarFunctions/Login';
 import Register from './NavBarFunctions/Register';
 import HeroSection from './ClassComponents/HeroSection';
-import StudentPage from './NavBarFunctions/StudentPage';
-import AdminPage from './NavBarFunctions/AdminPage';
-import ResearcherPage from './NavBarFunctions/ResearcherPage';
+import StudentPage from './UserPages/StudentPage';
+import AdminPage from './UserPages/AdminPage';
+import ResearcherPage from './UserPages/ResearcherPage';
 import ProtectedRoute from './ProtectedRoute';  
-import EquipmentPage from './NavBarFunctions/EquipmentPage';
-import AddEquipment from './NavBarFunctions/AddEquipment';
-import AddSupplier from './NavBarFunctions/AddSupplier';
-import AddSpecifications from './NavBarFunctions/AddSpecifications';
-import EquipmentDetails from './NavBarFunctions/EquipmentDetails'; 
+import EquipmentPage from './Equipments/EquipmentPage';
+import AddEquipment from './Equipments/AddEquipment';
+import AddSupplier from './Suppliers/AddSupplier';
+import AddSpecifications from './Specifications/AddSpecifications';
+import EquipmentDetails from './Equipments/EquipmentDetails'; 
 
 import './App.css';
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import './AddEquipment.css';
+import '../Equipments/AddEquipment.css';
+//./AddEquipment.css
 
 const AddSupplier = () => {
   const [formData, setFormData] = useState({
