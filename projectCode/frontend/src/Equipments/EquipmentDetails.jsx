@@ -57,6 +57,11 @@ const EquipmentDetails = () => {
   const handleRemoveEquipment = async () => {
     navigate('/removeequipment', { state: equipment});
   };
+
+  const handleEditEquipment = async () => {
+    navigate('/editequipment', { state: equipment});
+  };
+
   if (loading) return <div className="loading">Loading...</div>;
   if (!equipment) return <div className="not-found">Equipment not found.</div>;
 
@@ -102,6 +107,16 @@ const EquipmentDetails = () => {
         >
           Remove Item
         </button>
+        
+      )}
+       {(userRole === "admin") && (
+        <button 
+          onClick={handleEditEquipment}
+          className="book-button"
+        >
+          Edit Item
+        </button>
+        
       )}
     </div>
   );

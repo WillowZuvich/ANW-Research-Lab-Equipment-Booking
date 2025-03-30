@@ -14,6 +14,7 @@ from typing import List, Optional, ForwardRef
 from datetime import datetime
 from enum import Enum
 from sqlalchemy.orm import joinedload
+from sqlalchemy import delete, update
 
 load_dotenv()
 app = FastAPI()
@@ -139,11 +140,29 @@ class EquipID(BaseModel):
 async def remove_equip(equipid: EquipID, db: Session = Depends(get_db)):
     
     try:
-        db.query(Equipment).filter(EquipID.id==equipid).delete()
+        db.query(Equipment).filter(Equipment.EquipID==equipid.equipId).delete()
         db.commit()
     except Exception as e:
         db.rollback()
         print(f" Unable to remove item: {equipid}")
+    return {"message": "Equipment removed successfully!"}
+
+class EditEquip(BaseModel):
+     equipId: int
+     name: str
+     condition:str
+
+@app.post("/api/editequipment")
+async def edit_equip(equip: EditEquip, db: Session = Depends(get_db)): 
+    equipnew = db.query(Equipment).filter(Equipment.EquipID==equip.equipId).first()
+    try:
+        equipnew.Name = equip.name
+        equipnew.Condition = equip.condition
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f" Unable to update item: {equip.equipId}")   
+    return {"message": "Equipment updated successfully!"}
 
 class AddSpecificationRequest(BaseModel):
     equipId: int
