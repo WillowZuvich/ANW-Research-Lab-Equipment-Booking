@@ -124,7 +124,7 @@ async def add_equip(equip: AddEquipRequest, db: Session = Depends(get_db)):
             db.commit() 
             db.refresh(new_equip)
             print(f" Item registered: {new_equip.EquipID}")  
-            id = new_equip.EquipID
+            
         except Exception as e:
             db.rollback()  
             print(f" Error inserting user: {e}")
