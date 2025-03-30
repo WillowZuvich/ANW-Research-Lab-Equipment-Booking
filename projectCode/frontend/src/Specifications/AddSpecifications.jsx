@@ -30,6 +30,11 @@ const AddSpecifications = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const apiUrl = process.env.REACT_APP_API_URL;  // Connect to backend
+    if (inputs.length == 0)
+    {
+      alert("Specication is Missing.");
+        return;
+    }
     for(var i = 0; i < inputs.length; i++){
       
       if (!equip.EquipID ) {
@@ -39,14 +44,10 @@ const AddSpecifications = () => {
       
       const item = inputs[i];
 
-      if ( !item) {
-        alert("Specification is Missing.");
-        return;
-      }
-      else{ console.log(JSON.stringify({ 
+      console.log(JSON.stringify({ 
         equipId: equip.EquipID, 
         input: item,
-      }),)}
+      }),)
       try {
         const response = await fetch(`${apiUrl}/api/addspecifications`, { 
           method: 'POST',
