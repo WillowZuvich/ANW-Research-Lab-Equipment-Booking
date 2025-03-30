@@ -4,7 +4,7 @@
 from fastapi import FastAPI, HTTPException, Depends, Query
 from sqlalchemy.orm import Session
 from database import SessionLocal
-from models import Admin, Student, Researcher, Supplier, Equipment, Booking
+from models import Admin, Student, Researcher, Supplier, Equipment, Booking, Specification
 import bcrypt # type: ignore
 import os
 from dotenv import load_dotenv
@@ -118,18 +118,41 @@ async def add_equip(equip: AddEquipRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Invalid supplier. Please add supplier.")
     else:
         new_equip = Equipment(Name=equip.name, Condition=equip.condition, SupplierId=equip_supplier.SupplierId)
-    
+        id = 0
         try:
             db.add(new_equip)
             db.commit() 
             db.refresh(new_equip)
             print(f" Item registered: {new_equip.EquipID}")  
+            
         except Exception as e:
             db.rollback()  
             print(f" Error inserting user: {e}")
             raise HTTPException(status_code=500, detail="Database error")
 
-        return {"message": "Equipment added successfully!"}
+        return {"message": "Equipment added successfully!", "EquipID": {new_equip.EquipID}, "Name" : {new_equip.Name}}
+
+class AddSpecificationRequest(BaseModel):
+    equipId: int
+    input: str
+    
+
+@app.post("/api/addspecifications")
+async def add_specifications(spec: AddSpecificationRequest, db: Session = Depends(get_db)):
+    print(f"Received: equipId={spec.equipId}, input={spec.input}")
+
+    new_spec = Specification(Detail=spec.input, EquipmentID=spec.equipId)
+    try:
+        db.add(new_spec)
+        db.commit() 
+        db.refresh(new_spec)
+        print(f" Specification registered: {new_spec.EquipmentID}. {new_spec.Detail}")  
+    except Exception as e:
+        db.rollback()  
+        print(f" Error inserting user: {e}")
+        raise HTTPException(status_code=500, detail="Database error")
+
+    return {"message": "Specification added successfully!"}
     
 class AddSupplierRequest(BaseModel):
     name: str
