@@ -13,6 +13,7 @@ const StudentPage = () => {
 
   useEffect(() => {
     if (!studentId || userRole !== "student") {
+      console.log("Missing ID")
       navigate("/login");
       return;
     }
