@@ -54,6 +54,9 @@ const EquipmentDetails = () => {
     }
   };
 
+  const handleRemoveEquipment = async () => {
+    navigate('/removeequipment', { state: equipment});
+  };
   if (loading) return <div className="loading">Loading...</div>;
   if (!equipment) return <div className="not-found">Equipment not found.</div>;
 
@@ -89,6 +92,15 @@ const EquipmentDetails = () => {
           className="book-button"
         >
           {isRequesting ? "Processing..." : "Request to Book This Equipment"}
+        </button>
+      )}
+
+      {(userRole === "admin") && equipment.Availability === "Available" && (
+        <button 
+          onClick={handleRemoveEquipment}
+          className="book-button"
+        >
+          Remove Item
         </button>
       )}
     </div>

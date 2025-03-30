@@ -146,6 +146,15 @@ html, body {
   justify-content: center; /* Center content horizontally */
   gap: 5px; /* Add spacing between elements */
 }
+.p-removeEquip { /* Unique class for add specifications or supplier paragraph */
+  text-align: left; /* Center the paragraph text */
+  margin-top: 20px; /* Margin on top */
+  font-size: 20px;
+  width: 100%; /* Ensure it spans the full width */
+  display: flex; /* Use flexbox for alignment */
+  justify-content: left; /* Center content horizontally */
+  gap: 5px; /* Add spacing between elements */
+}
 .p-addEquip a { /* Unique class for links */
   color: #007bff; /* Link color */
   text-decoration: none; /* Remove underline */

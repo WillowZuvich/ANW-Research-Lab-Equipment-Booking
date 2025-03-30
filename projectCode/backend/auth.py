@@ -132,6 +132,19 @@ async def add_equip(equip: AddEquipRequest, db: Session = Depends(get_db)):
 
         return {"message": "Equipment added successfully!", "EquipID": {new_equip.EquipID}, "Name" : {new_equip.Name}}
 
+class EquipID(BaseModel):
+    equipId: int
+
+@app.post("/api/removeequipment")
+async def remove_equip(equipid: EquipID, db: Session = Depends(get_db)):
+    
+    try:
+        db.query(Equipment).filter(EquipID.id==equipid).delete()
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f" Unable to remove item: {equipid}")
+
 class AddSpecificationRequest(BaseModel):
     equipId: int
     input: str
