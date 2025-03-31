@@ -243,8 +243,6 @@ async def get_student_bookings(student_id: int, db: Session = Depends(get_db)):
         for b in bookings
     ]
 
-
-
 @app.get("/api/admin/bookings", response_model=List[BookingResponse])
 async def get_all_bookings(db: Session = Depends(get_db)):
     bookings = db.query(Booking).options(
@@ -482,9 +480,46 @@ async def get_equipment_details(equip_id: int, db: Session = Depends(get_db)):
         ).first() else "Booked",
         Specifications=[spec.Detail for spec in equipment.specifications]
     )
+    
+    
+# GET all suppliers (NEW ENDPOINT)
+class SupplierResponse(BaseModel):
+    name: str
+    email: str
+    phoneNumber: str
 
+    class Config:
+        orm_mode = True
 
+@app.get("/api/suppliers", response_model=List[SupplierResponse])
+async def get_all_suppliers(db: Session = Depends(get_db)):
+    suppliers = db.query(Supplier).all()
+    return [
+        SupplierResponse(
+            name=s.Name,
+            email=s.Email,
+            phoneNumber=s.PhoneNumber
+        ) for s in suppliers
+    ]
+    
+# Optional: Add PUT/DELETE endpoints later for updates/removal if needed.
 
+@app.get("/api/user")
+async def get_user_info(role: str = Query(...), userId: int = Query(...), db: Session = Depends(get_db)):
+    if role == "admin":
+        user = db.query(Admin).filter(Admin.AdminID == userId).first()
+    elif role == "student":
+        user = db.query(Student).filter(Student.StudentID == userId).first()
+    elif role == "researcher":
+        user = db.query(Researcher).filter(Researcher.EmpID == userId).first()
+    else:
+        raise HTTPException(status_code=400, detail="Invalid role")
 
-        
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
 
+    return {
+        "firstName": user.FirstName,
+        "lastName": user.LastName,
+        "role": role
+    }

@@ -25,7 +25,7 @@
   color: white;
   font-weight: bold;
   margin: 0;
-  margin-right: 15px; /* Add space between gciConnect and the image */
+  margin-right: 15px; /* Add space between ANW and the image */
   padding-top: 5px; /* Align with the other elements */
 }
 
@@ -49,7 +49,7 @@
 
 .nav-links a {
   text-decoration: none;
-  font-size: 27px; /* Set the same size as gciConnect */
+  font-size: 27px; /* Set the same size as ANW */
   /* color: #000; */
   color: white;
   font-weight: bold;
