@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import AdminNavBar from './AdminNavBar';
+
 import {  useNavigate } from "react-router-dom";
+
 import AdminSidebar from './AdminSidebar';
 
 const AdminEquipmentPage = () => {
@@ -12,12 +14,14 @@ const AdminEquipmentPage = () => {
   const [specOptions, setSpecOptions] = useState([]);
   const [supplierOptions, setSupplierOptions] = useState([]);
   const [notification, setNotification] = useState('');
+
   const [selectedRow, setSelectedRow] = useState(null);
   const navigate = useNavigate();
 
   const handleRowClick = (equipID) => {
     setSelectedRow(equipID === selectedRow ? null : equipID); 
   };
+
 
 
   const showNotification = (message) => {
@@ -112,6 +116,7 @@ const AdminEquipmentPage = () => {
     }
   };
 
+
   // Handler for navigating to Remove equipment page
   const handleRemoveEquipment = async (eq) => {
     console.log(eq);
@@ -123,6 +128,8 @@ const AdminEquipmentPage = () => {
     console.log(eq);
     navigate('/editequipment', { state: eq});
   };
+
+
   
 
   return (
@@ -185,6 +192,7 @@ const AdminEquipmentPage = () => {
                 <th style={{ padding: '10px' }}>Availability</th>
                 <th style={{ padding: '10px' }}>Specifications</th>
                 <th style={{ padding: '10px' }}>Actions</th>
+
               </tr>
             </thead>
             <tbody>
@@ -194,10 +202,12 @@ const AdminEquipmentPage = () => {
                  onClick={() => handleRowClick(eq.EquipID)} 
                  style={{ cursor: 'pointer' }} 
                  >
+
                   <td style={{ padding: '10px', border: '1px solid #ddd' }}>{eq.Name}</td>
                   <td style={{ padding: '10px', border: '1px solid #ddd' }}>{eq.Condition}</td>
                   <td style={{ padding: '10px', border: '1px solid #ddd' }}>{eq.Availability}</td>
                   <td style={{ padding: '10px', border: '1px solid #ddd' }}>{eq.Specifications?.join(', ') || '-'}</td>
+
                   <td style={{ padding: '10px', border: '1px solid #ddd' }}>
                     {/* Buttons for removing and adding Equipment */}
                   <div style={{ display: 'flex', gap: '10px' }}>
@@ -221,6 +231,7 @@ const AdminEquipmentPage = () => {
                     )}
                   </div>
                  </td>
+
                 </tr>
               ))}
             </tbody>
