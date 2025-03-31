@@ -8,6 +8,8 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const navigate = useNavigate(); 
 
+  localStorage.clear(); 
+
   //  Use a default API URL if process.env.REACT_APP_API_URL is undefined
   const apiUrl = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
 
@@ -44,6 +46,9 @@ const Login = () => {
           navigate('/researcher'); // Fixed from 'volunteer-dashboard'
         } else if (data.role === 'student') {
           navigate('/student');
+        }
+        else{
+          alert("Path not found...")
         }
       } else {
         // Show error message properly
