@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {  Link, useNavigate } from "react-router-dom";
 import { useLocation } from 'react-router-dom';
-import ReturnButton from "./ReturnButton";
+
 const RemoveEquipment = () => {
   
   const navigate = useNavigate(); // For navigation after equipment is added or supplier must be entered
