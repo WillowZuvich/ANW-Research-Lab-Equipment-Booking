@@ -14,6 +14,8 @@ import ResearcherPage from './UserPages/ResearcherPage';
 import ProtectedRoute from './ProtectedRoute';  
 import EquipmentPage from './Equipments/EquipmentPage';
 import AddEquipment from './Equipments/AddEquipment';
+import RemoveEquipment from './Equipments/RemoveEquipment';
+import EditEquipment from './Equipments/EditEquipment';
 import AddSupplier from './Suppliers/AddSupplier';
 import AddSpecifications from './Specifications/AddSpecifications';
 import EquipmentDetails from './Equipments/EquipmentDetails'; 
@@ -72,12 +74,14 @@ const AppContent = () => {
           <Navbar />
           <Footer />
         </>
+
       )}    */}
 
       <>
         <Navbar />
         <Footer />
       </>  
+
 
 
       <Routes>
@@ -92,6 +96,8 @@ const AppContent = () => {
 
         {/* <Route path="/admin" element={<ProtectedRoute allowedRoles={["admin"]}><AdminPage /></ProtectedRoute>} />
         <Route path="/addequipment" element={<ProtectedRoute allowedRoles={["admin"]}><AddEquipment /></ProtectedRoute>} />
+        <Route path="/removeequipment" element={<ProtectedRoute allowedRoles={["admin"]}><RemoveEquipment /></ProtectedRoute>} />
+        <Route path="/editequipment" element={<ProtectedRoute allowedRoles={["admin"]}><EditEquipment /></ProtectedRoute>} />
         <Route path="/addsupplier" element={<ProtectedRoute allowedRoles={["admin"]}><AddSupplier /></ProtectedRoute>} />
         <Route path="/addspecifications" element={<ProtectedRoute allowedRoles={["admin"]}><AddSpecifications /></ProtectedRoute>} /> */}
 
