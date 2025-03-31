@@ -47,10 +47,10 @@ const Login = () => {
         } else if (data.role === 'student') {
           navigate('/student');
         }
-        else{
-          alert("Path not found...")
-        }
-      } else {
+         else{
+          alert("Path not found...") }
+         }
+        else {
         // Show error message properly
         alert(data.detail || 'Invalid login credentials.');
       }

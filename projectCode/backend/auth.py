@@ -14,6 +14,7 @@ from typing import List, Optional, ForwardRef
 from datetime import datetime
 from enum import Enum
 from sqlalchemy.orm import joinedload
+from sqlalchemy import delete, update
 
 load_dotenv()
 app = FastAPI()
@@ -132,6 +133,37 @@ async def add_equip(equip: AddEquipRequest, db: Session = Depends(get_db)):
 
         return {"message": "Equipment added successfully!", "EquipID": {new_equip.EquipID}, "Name" : {new_equip.Name}}
 
+class EquipID(BaseModel):
+    equipId: int
+
+@app.post("/api/removeequipment")
+async def remove_equip(equipid: EquipID, db: Session = Depends(get_db)):
+    
+    try:
+        db.query(Equipment).filter(Equipment.EquipID==equipid.equipId).delete()
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f" Unable to remove item: {equipid}")
+    return {"message": "Equipment removed successfully!"}
+
+class EditEquip(BaseModel):
+     equipId: int
+     name: str
+     condition:str
+
+@app.post("/api/editequipment")
+async def edit_equip(equip: EditEquip, db: Session = Depends(get_db)): 
+    equipnew = db.query(Equipment).filter(Equipment.EquipID==equip.equipId).first()
+    try:
+        equipnew.Name = equip.name
+        equipnew.Condition = equip.condition
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f" Unable to update item: {equip.equipId}")   
+    return {"message": "Equipment updated successfully!"}
+
 class AddSpecificationRequest(BaseModel):
     equipId: int
     input: str
@@ -210,8 +242,6 @@ async def get_student_bookings(student_id: int, db: Session = Depends(get_db)):
         )
         for b in bookings
     ]
-
-
 
 @app.get("/api/admin/bookings", response_model=List[BookingResponse])
 async def get_all_bookings(db: Session = Depends(get_db)):
@@ -450,9 +480,46 @@ async def get_equipment_details(equip_id: int, db: Session = Depends(get_db)):
         ).first() else "Booked",
         Specifications=[spec.Detail for spec in equipment.specifications]
     )
+    
+    
+# GET all suppliers (NEW ENDPOINT)
+class SupplierResponse(BaseModel):
+    name: str
+    email: str
+    phoneNumber: str
 
+    class Config:
+        orm_mode = True
 
+@app.get("/api/suppliers", response_model=List[SupplierResponse])
+async def get_all_suppliers(db: Session = Depends(get_db)):
+    suppliers = db.query(Supplier).all()
+    return [
+        SupplierResponse(
+            name=s.Name,
+            email=s.Email,
+            phoneNumber=s.PhoneNumber
+        ) for s in suppliers
+    ]
+    
+# Optional: Add PUT/DELETE endpoints later for updates/removal if needed.
 
+@app.get("/api/user")
+async def get_user_info(role: str = Query(...), userId: int = Query(...), db: Session = Depends(get_db)):
+    if role == "admin":
+        user = db.query(Admin).filter(Admin.AdminID == userId).first()
+    elif role == "student":
+        user = db.query(Student).filter(Student.StudentID == userId).first()
+    elif role == "researcher":
+        user = db.query(Researcher).filter(Researcher.EmpID == userId).first()
+    else:
+        raise HTTPException(status_code=400, detail="Invalid role")
 
-        
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
 
+    return {
+        "firstName": user.FirstName,
+        "lastName": user.LastName,
+        "role": role
+    }
