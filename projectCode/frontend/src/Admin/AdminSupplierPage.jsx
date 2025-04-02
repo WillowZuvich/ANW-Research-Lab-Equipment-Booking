@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import AdminNavBar from './AdminNavBar';
-import AdminSidebar from './AdminSidebar';
 
 const AdminSupplierPage = () => {
   const [suppliers, setSuppliers] = useState([]);
@@ -9,14 +7,14 @@ const AdminSupplierPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [notification, setNotification] = useState('');
 
-  const showNotification = (message) => {
-    setNotification(message);
-    setTimeout(() => setNotification(''), 5000);
-  };
-
   useEffect(() => {
     fetchSuppliers();
   }, []);
+
+  const showNotification = (message) => {
+    setNotification(message);
+    setTimeout(() => setNotification(''), 7000);
+  };
 
   const fetchSuppliers = async () => {
     try {
@@ -52,10 +50,7 @@ const AdminSupplierPage = () => {
 
   return (
     <div>
-      {/* <AdminNavBar firstName="Admin" lastInitial="A" /> */}
-      <AdminNavBar />
       <div style={{ display: 'flex' }}>
-        <AdminSidebar />
         <div style={{ padding: '2rem', width: '100%', paddingLeft: '100px', paddingTop: '50px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', margin: 0 }}>Suppliers</h2>

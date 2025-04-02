@@ -1,0 +1,17 @@
+.admin-layout {
+    display: flex;
+  }
+  
+  .admin-content {
+    margin-left: 180px;
+    padding: 100px 2rem 2rem 2rem;
+    width: 100%;
+    min-height: 100vh;
+    background-color: #f9f9f9;
+    box-sizing: border-box;
+  }
+  
+  body {
+    padding-top: 100px; /* matches navbar height */
+  }
+  

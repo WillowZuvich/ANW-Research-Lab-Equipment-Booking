@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import AdminNavBar from "./AdminNavBar";
-import AdminSidebar from "./AdminSidebar";
 import './AdminBookingPage.css';
 
 const AdminBookingPage = () => {
-  const [user, setUser] = useState({ firstName: '', lastName: '' });
   const [bookings, setBookings] = useState([]);
   const [statusUpdates, setStatusUpdates] = useState({});
   const [loading, setLoading] = useState(true);
@@ -34,24 +31,6 @@ const AdminBookingPage = () => {
     }
   };
 
-  const fetchUser = async () => {
-    const apiUrl = process.env.REACT_APP_API_URL;
-    const role = localStorage.getItem('role');
-    const userId = localStorage.getItem('userId');
-
-    if (!role || !userId) return;
-
-    try {
-      const res = await axios.get(`${apiUrl}/api/user`, {
-        params: { role, userId }
-      });
-      const data = res.data;
-      setUser({ firstName: data.firstName, lastName: data.lastName });
-    } catch (err) {
-      console.error("Error fetching user", err);
-    }
-  };
-
   const handleStatusChange = (id, value) => {
     setStatusUpdates(prev => ({ ...prev, [id]: value }));
   };
@@ -76,17 +55,11 @@ const AdminBookingPage = () => {
 
   useEffect(() => {
     fetchBookings();
-    fetchUser();
   }, []);
 
   return (
     <div>
-      <AdminNavBar
-        firstName={user.firstName}
-        lastInitial={user.lastName.charAt(0)}
-      />
       <div className="admin-layout">
-        <AdminSidebar />
         <div className="admin-container">
           <h2>Booking Requests</h2>
           {loading ? <p>Loading...</p> : (
