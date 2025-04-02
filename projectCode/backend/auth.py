@@ -292,7 +292,7 @@ async def get_researcher_bookings(researcher_id: int, db: Session = Depends(get_
         BookingResponse(
             BookingID=b.BookingID,
             Status=b.Status,
-            EquipmentName=b.equipment.Name,
+            EquipmentName=b.equipment.Name if b.equipment else "No equipment",  # Check if equipment exists
             RequestDate=b.RequestDate.strftime("%m/%d/%Y %H:%M:%S") if b.RequestDate else "",
             StartTime=b.StartTime.strftime("%m/%d/%Y %H:%M:%S") if b.StartTime else "",
             EndTime=b.EndTime.strftime("%m/%d/%Y %H:%M:%S") if b.EndTime else "",
@@ -300,6 +300,7 @@ async def get_researcher_bookings(researcher_id: int, db: Session = Depends(get_
         )
         for b in bookings
     ]
+
 
 class CreateBookingRequest(BaseModel):
     user_id: int  # Generic field that can be StudentID or ResearcherID
