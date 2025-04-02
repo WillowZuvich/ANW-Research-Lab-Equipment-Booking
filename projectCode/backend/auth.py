@@ -140,7 +140,8 @@ class EquipID(BaseModel):
 async def remove_equip(equipid: EquipID, db: Session = Depends(get_db)):
     
     try:
-        db.query(Equipment).filter(Equipment.EquipID==equipid.equipId).delete()
+        equip = db.query(Equipment).filter(Equipment.EquipID==equipid.equipId).first()
+        db.delete(equip)
         db.commit()
     except Exception as e:
         db.rollback()

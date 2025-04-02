@@ -83,7 +83,6 @@ const AppContent = () => {
       </>  
 
 
-
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<HeroSection />} />
@@ -100,6 +99,11 @@ const AppContent = () => {
         <Route path="/editequipment" element={<ProtectedRoute allowedRoles={["admin"]}><EditEquipment /></ProtectedRoute>} />
         <Route path="/addsupplier" element={<ProtectedRoute allowedRoles={["admin"]}><AddSupplier /></ProtectedRoute>} />
         <Route path="/addspecifications" element={<ProtectedRoute allowedRoles={["admin"]}><AddSpecifications /></ProtectedRoute>} /> */}
+
+
+        <Route path="/removeequipment" element={<ProtectedRoute allowedRoles={["admin"]}><RemoveEquipment /></ProtectedRoute>} />
+        <Route path="/editequipment" element={<ProtectedRoute allowedRoles={["admin"]}><EditEquipment /></ProtectedRoute>} />
+
 
         {/* === Admin Routes (each one inside AdminLayout) === */}
         <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminLayout><AdminDashboard  /></AdminLayout></ProtectedRoute>} />

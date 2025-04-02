@@ -45,10 +45,10 @@ const EditEquipment = () => {
       const data = await response.json();
       if (response.ok) {
         alert('Equipment item edited succesfully.');
-        navigate('/equipment')
+        navigate('/admin/equipments')
       } else {
         alert(data.detail);
-        navigate('/equipment',  { state: data})
+        navigate('/admin/equipments',  { state: data})
       }
     } catch (error) {
       console.error('Unable to edit item:', error);
@@ -83,7 +83,7 @@ const EditEquipment = () => {
             <input type="submit" value="Submit Changes" className="add-btn" />
           </div>
           <p className="p-addEquip">
-            <Link to="/admin"> Cancel here</Link>
+            <Link to="/admin/equipments"> Cancel here</Link>
           </p>
         </form>
       </div>

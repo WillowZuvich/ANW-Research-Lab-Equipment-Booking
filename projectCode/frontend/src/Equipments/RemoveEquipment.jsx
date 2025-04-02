@@ -26,7 +26,7 @@ const RemoveEquipment = () => {
       if (response.ok) {
         alert('Equipment item removed succesfully.');
        
-        navigate('/equipment',  { state: data});
+        navigate('/admin/equipments',  { state: data});
       } else {
         alert(data.detail);
       }
@@ -55,7 +55,7 @@ const RemoveEquipment = () => {
             <input type="submit" value="Permanently Remove  Item" className="add-btn" />
           </div>
           <p className="p-addEquip">
-            <Link to="/equipment"> Cancel here</Link>
+            <Link to="/admin/equipments"> Cancel here</Link>
           </p>
         </form>
       </div>
