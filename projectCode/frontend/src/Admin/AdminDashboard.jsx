@@ -28,10 +28,8 @@ const AdminDashboard = () => {
   }, []);
 
   return (
-    <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-      {/* <h1>Welcome, {user.firstName} {user.lastName.charAt(0)}.</h1> */}
-      <h1>Welcome</h1>
-
+    <div style={{ textAlign: 'center', marginTop: '10rem', width: '900px', height: '500px' }}>
+      <h1>Welcome, {user.firstName} {user.lastName.charAt(0)}.</h1>
     </div>
   );
 };
