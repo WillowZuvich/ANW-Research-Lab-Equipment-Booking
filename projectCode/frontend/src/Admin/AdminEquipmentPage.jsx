@@ -268,6 +268,9 @@
 
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import AdminNavBar from './AdminNavBar';
+import {  useNavigate } from "react-router-dom";
+import AdminSidebar from './AdminSidebar';
 
 const AdminEquipmentPage = () => {
   const [equipmentList, setEquipmentList] = useState([]);

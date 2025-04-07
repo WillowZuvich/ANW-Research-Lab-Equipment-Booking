@@ -28,10 +28,27 @@ const AppContent = () => {
 
   return (
     <div className="App">
+
+      {/* {isAdminPage ? (
+        <>
+          <AdminNavBar role="ADMIN" firstName={user.firstName} lastInitial={user.lastName.charAt(0)} />
+          <AdminSidebar />
+        </>
+      ) 
+      : (
+        <>
+          <Navbar />
+          <Footer />
+        </>
+
+      )}    */}
+
       <>
         <Navbar />
         <Footer />
       </>  
+
+
 
       <Routes>
         {/* Public Routes */}
@@ -42,6 +59,7 @@ const AppContent = () => {
         <Route path="/register" element={<Register />} />
 
             {/* Protected Routes (Only accessible after login) */}
+
         {/* === Admin Routes (each one inside AdminLayout) === */}
         <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminLayout><AdminDashboard  /></AdminLayout></ProtectedRoute>} />
         <Route path="/admin/bookings" element={<ProtectedRoute allowedRoles={['admin']}><AdminLayout><AdminBookingPage /></AdminLayout></ProtectedRoute>} />
