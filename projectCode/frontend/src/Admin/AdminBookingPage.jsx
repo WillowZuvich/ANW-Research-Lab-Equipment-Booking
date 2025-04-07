@@ -6,6 +6,7 @@ const AdminBookingPage = () => {
   const [bookings, setBookings] = useState([]);
   const [statusUpdates, setStatusUpdates] = useState({});
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState({status: ''});
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -53,6 +54,17 @@ const AdminBookingPage = () => {
     fetchBookings();
   };
 
+
+  const handleFilterChange = (e) => {
+    setFilters({ ...filters, [e.target.name]: e.target.value });
+  };
+
+  const filteredBookings = bookings.filter(b =>
+    (filters.status === '' || b.Status === filters.status) 
+  );
+
+
+
   useEffect(() => {
     fetchBookings();
   }, []);
@@ -62,6 +74,18 @@ const AdminBookingPage = () => {
       <div className="admin-layout">
         <div className="admin-container">
           <h2>Booking Requests</h2>
+
+          <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', marginBottom: '1rem' }}>
+            <select name="status" onChange={handleFilterChange} value={filters.status}>
+              <option value="">Any Status</option>
+              <option value="Pending Request">Pending Request</option>
+              <option value="Approved">Approved</option>
+              <option value="Denied">Denied</option>
+              <option value="Booking Canceled">Canceled</option>
+              
+            </select>
+          </div>
+
           {loading ? <p>Loading...</p> : (
 
           <div className="bookings-table-container">
@@ -72,7 +96,7 @@ const AdminBookingPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {bookings.map((b) => (
+                {filteredBookings.map((b) => (
                   <tr key={b.BookingID}>
                     <td>{b.BookingID}</td>
                     <td>{b.requester_info?.name || "N/A"} ({b.requester_info?.role})</td>
