@@ -186,6 +186,31 @@ async def add_specifications(spec: AddSpecificationRequest, db: Session = Depend
         raise HTTPException(status_code=500, detail="Database error")
 
     return {"message": "Specification added successfully!"}
+
+class SpecDeleteByDetailRequest(BaseModel):
+   equipId: int
+   detail: str
+
+@app.post("/api/removespecification")
+async def remove_specification(data: SpecDeleteByDetailRequest, db: Session = Depends(get_db)):
+   try:
+       spec_to_delete = db.query(Specification).filter(
+           Specification.EquipmentID == data.equipId,
+           Specification.Detail == data.detail
+       ).first()
+
+       if not spec_to_delete:
+           raise HTTPException(status_code=404, detail="Specification not found")
+
+       db.delete(spec_to_delete)
+       db.commit()
+       return {"message": "Specification removed successfully!"}
+
+   except Exception as e:
+       db.rollback()
+       print(f"Error deleting specification: {e}")
+       raise HTTPException(status_code=500, detail="Failed to delete specification")
+
     
 class AddSupplierRequest(BaseModel):
     name: str
