@@ -191,10 +191,12 @@ const StudentBookingPage = () => {
   const [bookings, setBookings] = useState([]);
   const [selectedRow, setSelectedRow] = useState(null);
   const [notification, setNotification] = useState("");
+  const [filters, setFilters] = useState({name: '',status: ''});
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmActionType, setConfirmActionType] = useState(null); // 'cancel' or 'return'
   const [actionBooking, setActionBooking] = useState(null);
   const studentId = localStorage.getItem("userId");
+
 
   useEffect(() => {
     fetchBookings();
@@ -255,6 +257,16 @@ const StudentBookingPage = () => {
     }
   };
 
+
+  const handleFilterChange = (e) => {
+    setFilters({ ...filters, [e.target.name]: e.target.value });
+  };
+
+  const filteredBookings = bookings.filter(b =>
+    (filters.status === '' || b.Status === filters.status) 
+  );
+
+
   const getStatusColor = (status) => {
     switch (status) {
       case "Pending Request": return "orange";
@@ -275,6 +287,17 @@ const StudentBookingPage = () => {
 
         <h2 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>My Bookings</h2>
 
+        <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', marginBottom: '1rem' }}>
+            <select name="status" onChange={handleFilterChange} value={filters.status}>
+              <option value="">Any Status</option>
+              <option value="Approved">Approved</option>
+              <option value="Pending Request">Pending Request</option>
+              <option value="Denied">Denied</option>
+              <option value="Booking Canceled">Canceled</option>
+              
+            </select>
+          </div>
+
         <table style={{ width: "100%", borderCollapse: "collapse", backgroundColor: "white", marginTop: "1rem" }}>
           <thead style={{ backgroundColor: "#f5f5f5", textAlign: "left" }}>
             <tr>
@@ -287,7 +310,7 @@ const StudentBookingPage = () => {
             </tr>
           </thead>
           <tbody>
-            {bookings.map((b) => (
+            {filteredBookings.map((b) => (
               <tr
                 key={b.BookingID}
                 onClick={() => handleRowClick(b.BookingID)}

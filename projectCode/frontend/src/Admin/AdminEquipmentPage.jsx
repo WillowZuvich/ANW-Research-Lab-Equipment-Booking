@@ -358,7 +358,6 @@ const AdminEquipmentPage = () => {
     }
   };
 
-<<<<<<< HEAD
   const handleEditClick = (eq) => {
     setActionType('edit');
     setActionEquipment(eq);
@@ -401,20 +400,6 @@ const AdminEquipmentPage = () => {
       alert('Error removing equipment');
     }
   };
-=======
-  // Handler for navigating to Remove equipment page
-  const handleRemoveEquipment = async (eq) => {
-    console.log(eq);
-    navigate('/removeequipment', { state: eq});
-  };
-
-  // Handler for navigating to Edit equipment page
-  const handleEditEquipment = async (eq) => {
-    console.log(eq);
-    navigate('/editequipment', { state: eq});
-  };
-  
->>>>>>> 63c2451 (Equipment & Restructure of the user pages)
 
   return (
     <div>
@@ -464,21 +449,12 @@ const AdminEquipmentPage = () => {
             </thead>
             <tbody>
               {filteredEquipment.map(eq => (
-<<<<<<< HEAD
                 <tr key={eq.EquipID} onClick={() => handleRowClick(eq.EquipID)} style={{ cursor: 'pointer' }}>
-=======
-                <tr
-                 key={eq.EquipID}
-                 onClick={() => handleRowClick(eq.EquipID)} 
-                 style={{ cursor: 'pointer' }} 
-                 >
->>>>>>> 63c2451 (Equipment & Restructure of the user pages)
                   <td style={{ padding: '10px', border: '1px solid #ddd' }}>{eq.Name}</td>
                   <td style={{ padding: '10px', border: '1px solid #ddd' }}>{eq.Condition}</td>
                   <td style={{ padding: '10px', border: '1px solid #ddd' }}>{eq.Availability}</td>
                   <td style={{ padding: '10px', border: '1px solid #ddd' }}>{eq.Specifications?.join(', ') || '-'}</td>
                   <td style={{ padding: '10px', border: '1px solid #ddd' }}>
-<<<<<<< HEAD
                     {selectedRow === eq.EquipID && (
                       <div style={{ display: 'flex', gap: '10px' }}>
                         <button style={{ padding: '5px 10px', backgroundColor: 'pink', color: 'black', borderRadius: '5px', border: 'none' }} onClick={() => handleRemoveClick(eq)}>Remove</button>
@@ -486,30 +462,6 @@ const AdminEquipmentPage = () => {
                       </div>
                     )}
                   </td>
-=======
-                    {/* Buttons for removing and adding Equipment */}
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                      {selectedRow === eq.EquipID && (
-                        <button 
-                          style={{ padding: '5px 10px', backgroundColor: 'pink', color: 'black', borderRadius: '5px', border: 'none' }}
-                          onClick={() => handleRemoveEquipment(eq)} 
-                          >
-                          Remove Item
-                        </button>
-                        
-                    )}
-                    {selectedRow === eq.EquipID && (
-                        <button 
-                          style={{ padding: '5px 10px', backgroundColor: '#add8e6', color: 'black', borderRadius: '5px', border: 'none' }}
-                          onClick={() => handleEditEquipment(eq)}
-                          >
-                          Edit Item
-                        </button>
-                        
-                    )}
-                  </div>
-                 </td>
->>>>>>> 63c2451 (Equipment & Restructure of the user pages)
                 </tr>
               ))}
             </tbody>

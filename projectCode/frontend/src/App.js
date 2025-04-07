@@ -28,10 +28,27 @@ const AppContent = () => {
 
   return (
     <div className="App">
+
+      {/* {isAdminPage ? (
+        <>
+          <AdminNavBar role="ADMIN" firstName={user.firstName} lastInitial={user.lastName.charAt(0)} />
+          <AdminSidebar />
+        </>
+      ) 
+      : (
+        <>
+          <Navbar />
+          <Footer />
+        </>
+
+      )}    */}
+
       <>
         <Navbar />
         <Footer />
       </>  
+
+
 
       <Routes>
         {/* Public Routes */}
@@ -41,13 +58,8 @@ const AppContent = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-<<<<<<< HEAD
             {/* Protected Routes (Only accessible after login) */}
-=======
-        <Route path="/removeequipment" element={<ProtectedRoute allowedRoles={["admin"]}><RemoveEquipment /></ProtectedRoute>} />
-        <Route path="/editequipment" element={<ProtectedRoute allowedRoles={["admin"]}><EditEquipment /></ProtectedRoute>} />
 
->>>>>>> fc6105a (Completed remove equipment)
         {/* === Admin Routes (each one inside AdminLayout) === */}
         <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminLayout><AdminDashboard  /></AdminLayout></ProtectedRoute>} />
         <Route path="/admin/bookings" element={<ProtectedRoute allowedRoles={['admin']}><AdminLayout><AdminBookingPage /></AdminLayout></ProtectedRoute>} />
