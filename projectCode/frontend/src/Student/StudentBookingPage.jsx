@@ -191,7 +191,7 @@ const StudentBookingPage = () => {
   const [bookings, setBookings] = useState([]);
   const [selectedRow, setSelectedRow] = useState(null);
   const [notification, setNotification] = useState("");
-  const [filters, setFilters] = useState({name: '',status: ''});
+  const [filters, setFilters] = useState({status: ''});
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmActionType, setConfirmActionType] = useState(null); // 'cancel' or 'return'
   const [actionBooking, setActionBooking] = useState(null);
