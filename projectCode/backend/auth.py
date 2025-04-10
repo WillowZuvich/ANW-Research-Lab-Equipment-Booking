@@ -529,7 +529,6 @@ async def get_all_suppliers(db: Session = Depends(get_db)):
         ) for s in suppliers
     ]
     
-# Optional: Add PUT/DELETE endpoints later for updates/removal if needed.
 
 @app.get("/api/user")
 async def get_user_info(role: str = Query(...), userId: int = Query(...), db: Session = Depends(get_db)):
