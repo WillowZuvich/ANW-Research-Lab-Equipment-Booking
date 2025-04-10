@@ -7,6 +7,10 @@ const AdminSpecificationPage = () => {
   const [newSpec, setNewSpec] = useState('');
   const [notification, setNotification] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [selectedSpecId, setSelectedSpecId] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteEquipId, setDeleteEquipId] = useState(null);
+  const [deleteSpecDetail, setDeleteSpecDetail] = useState('');
 
   useEffect(() => {
     fetchEquipment();
@@ -44,7 +48,7 @@ const AdminSpecificationPage = () => {
       setNewSpec('');
       setSelectedEquipId('');
       setShowModal(false);
-      fetchEquipment(); // Refresh
+      fetchEquipment();
     } catch (err) {
       alert('Error adding specification.');
       console.error(err);
@@ -69,7 +73,6 @@ const AdminSpecificationPage = () => {
             <p style={{ color: 'green', marginTop: '1rem', marginBottom: '1rem' }}>{notification}</p>
           )}
 
-          {/* Equipment Table */}
           <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: 'white', marginTop: '1rem' }}>
             <thead style={{ backgroundColor: '#f5f5f5', textAlign: 'left' }}>
               <tr>
@@ -83,13 +86,57 @@ const AdminSpecificationPage = () => {
                 <tr key={eq.EquipID}>
                   <td style={{ padding: '10px', border: '1px solid #ddd' }}>{eq.Name}</td>
                   <td style={{ padding: '10px', border: '1px solid #ddd' }}>{eq.Condition}</td>
-                  <td style={{ padding: '10px', border: '1px solid #ddd' }}>{eq.Specifications?.join(', ') || '-'}</td>
+                  <td style={{ padding: '10px', border: '1px solid #ddd' }}>
+                    {eq.Specifications && eq.Specifications.length > 0 ? (
+                      <ul style={{ listStyle: 'none', paddingLeft: 0 }}>
+                        {eq.Specifications.map((spec, idx) => {
+                          const id = `${eq.EquipID}-${spec}`;
+                          return (
+                            <li
+                              key={idx}
+                              onClick={() => setSelectedSpecId(id === selectedSpecId ? null : id)}
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                cursor: 'pointer',
+                                padding: '4px 0',
+                                width: '100%' // Can modify that
+                              }}
+                            >
+                              {spec}
+                              {selectedSpecId === id && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setDeleteEquipId(eq.EquipID);
+                                    setDeleteSpecDetail(spec);
+                                    setShowDeleteModal(true);
+                                  }}
+                                  style={{
+                                    marginLeft: '10px',
+                                    backgroundColor: 'red',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    padding: '2px 8px'
+                                  }}
+                                >
+                                  Delete
+                                </button>
+                              )}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : '-'}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
 
-          {/* Modal */}
+          {/* Add Spec Modal */}
           {showModal && (
             <div style={{
               position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
@@ -132,6 +179,56 @@ const AdminSpecificationPage = () => {
                     Submit
                   </button>
                 </form>
+              </div>
+            </div>
+          )}
+
+          {/* Delete Spec Modal */}
+          {showDeleteModal && (
+            <div style={{
+              position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+              backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex',
+              alignItems: 'center', justifyContent: 'center', zIndex: 1000
+            }}>
+              <div style={{
+                background: 'white', padding: '2rem', borderRadius: '8px',
+                width: '400px', position: 'relative'
+              }}>
+                <button onClick={() => setShowDeleteModal(false)}
+                  style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '1.2rem', border: 'none', background: 'none', cursor: 'pointer' }}>
+                  ×
+                </button>
+                <h3>Confirm Delete</h3>
+                <p>Are you sure you want to delete the specification:</p>
+                <p style={{ fontWeight: 'bold' }}>{deleteSpecDetail}</p>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '1rem' }}>
+                  <button
+                    onClick={() => setShowDeleteModal(false)}
+                    style={{ padding: '0.5rem 1rem', borderRadius: '5px', backgroundColor: 'gray', color: 'white', border: 'none' }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={async () => {
+                      try {
+                        const apiUrl = process.env.REACT_APP_API_URL;
+                        await axios.post(`${apiUrl}/api/removespecification`, {
+                          equipId: deleteEquipId,
+                          detail: deleteSpecDetail,
+                        });
+                        setShowDeleteModal(false);
+                        setSelectedSpecId(null);
+                        showNotification("Specification removed!");
+                        fetchEquipment();
+                      } catch (err) {
+                        alert("Error removing specification");
+                      }
+                    }}
+                    style={{ padding: '0.5rem 1rem', borderRadius: '5px', backgroundColor: 'red', color: 'white', border: 'none' }}
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
           )}
