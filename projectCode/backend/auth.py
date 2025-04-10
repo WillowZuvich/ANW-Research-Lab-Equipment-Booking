@@ -529,7 +529,6 @@ async def get_all_suppliers(db: Session = Depends(get_db)):
         ) for s in suppliers
     ]
     
-# Optional: Add PUT/DELETE endpoints later for updates/removal if needed.
 
 @app.get("/api/user")
 async def get_user_info(role: str = Query(...), userId: int = Query(...), db: Session = Depends(get_db)):
@@ -550,3 +549,26 @@ async def get_user_info(role: str = Query(...), userId: int = Query(...), db: Se
         "lastName": user.LastName,
         "role": role
     }
+
+
+class EditSpecificationRequest(BaseModel):
+    equipId: int
+    updated_detail: str
+
+@app.put("/api/editspecification")
+async def edit_specification(spec: EditSpecificationRequest, db: Session = Depends(get_db)):
+    existing_spec = db.query(Specification).filter(Specification.EquipmentID == spec.equipId).first()
+
+    if not existing_spec:
+        raise HTTPException(status_code=404, detail="Specification not found for this equipment")
+
+    try:
+        existing_spec.Detail = spec.updated_detail
+        db.commit()
+        db.refresh(existing_spec)
+    except Exception as e:
+        db.rollback()
+        print(f"Error updating specification: {e}")
+        raise HTTPException(status_code=500, detail="Failed to update specification")
+
+    return {"message": "Specification updated successfully!"}

@@ -11,6 +11,8 @@ const AdminSpecificationPage = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteEquipId, setDeleteEquipId] = useState(null);
   const [deleteSpecDetail, setDeleteSpecDetail] = useState('');
+  const [editingSpecId, setEditingSpecId] = useState(null);
+  const [editedSpecText, setEditedSpecText] = useState('');
 
   useEffect(() => {
     fetchEquipment();
@@ -101,29 +103,94 @@ const AdminSpecificationPage = () => {
                                 alignItems: 'center',
                                 cursor: 'pointer',
                                 padding: '4px 0',
-                                width: '100%' // Can modify that
+                                width: '100%'
                               }}
                             >
-                              {spec}
-                              {selectedSpecId === id && (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setDeleteEquipId(eq.EquipID);
-                                    setDeleteSpecDetail(spec);
-                                    setShowDeleteModal(true);
-                                  }}
-                                  style={{
-                                    marginLeft: '10px',
-                                    backgroundColor: 'red',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    padding: '2px 8px'
-                                  }}
-                                >
-                                  Delete
-                                </button>
+                              {editingSpecId === id ? (
+                                <>
+                                  <input
+                                    type="text"
+                                    value={editedSpecText}
+                                    onChange={(e) => setEditedSpecText(e.target.value)}
+                                    style={{ marginRight: '8px' }}
+                                  />
+                                  <button
+                                    onClick={async (e) => {
+                                      e.stopPropagation();
+                                      try {
+                                        const apiUrl = process.env.REACT_APP_API_URL;
+                                        await axios.put(`${apiUrl}/api/editspecification`, {
+                                          equipId: eq.EquipID,
+                                          updated_detail: editedSpecText,
+                                        });
+                                        showNotification("Specification updated!");
+                                        setEditingSpecId(null);
+                                        setEditedSpecText('');
+                                        fetchEquipment();
+                                      } catch (err) {
+                                        alert("Error updating specification");
+                                      }
+                                    }}
+                                    style={{ backgroundColor: '#4CAF50', color: 'white', border: 'none', padding: '2px 8px', marginRight: '4px' }}
+                                  >
+                                    Save
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setEditingSpecId(null);
+                                      setEditedSpecText('');
+                                    }}
+                                    style={{ backgroundColor: 'gray', color: 'white', border: 'none', padding: '2px 8px' }}
+                                  >
+                                    Cancel
+                                  </button>
+                                </>
+                              ) : (
+                                <>
+                                  {spec}
+                                  {selectedSpecId === id && (
+                                    <>
+                                      {/* Edit button comes FIRST */}
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setEditingSpecId(id);
+                                          setEditedSpecText(spec);
+                                        }}
+                                        style={{
+                                          marginLeft: '10px',
+                                          backgroundColor: '#add8e6',
+                                          color: 'black',
+                                          border: 'none',
+                                          borderRadius: '4px',
+                                          padding: '2px 8px'
+                                        }}
+                                      >
+                                        Edit
+                                      </button>
+                                      {/* Delete button stays unchanged */}
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setDeleteEquipId(eq.EquipID);
+                                          setDeleteSpecDetail(spec);
+                                          setShowDeleteModal(true);
+                                        }}
+                                        style={{
+                                          marginLeft: '10px',
+                                          backgroundColor: 'red',
+                                          color: 'white',
+                                          border: 'none',
+                                          borderRadius: '4px',
+                                          padding: '2px 8px'
+                                        }}
+                                      >
+                                        Delete
+                                      </button>
+                                    </>
+                                  )}
+                                </>
                               )}
                             </li>
                           );
@@ -136,7 +203,7 @@ const AdminSpecificationPage = () => {
             </tbody>
           </table>
 
-          {/* Add Spec Modal */}
+          {/* Add Specification Modal */}
           {showModal && (
             <div style={{
               position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
@@ -183,7 +250,7 @@ const AdminSpecificationPage = () => {
             </div>
           )}
 
-          {/* Delete Spec Modal */}
+          {/* Delete Specification Modal */}
           {showDeleteModal && (
             <div style={{
               position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
@@ -232,6 +299,7 @@ const AdminSpecificationPage = () => {
               </div>
             </div>
           )}
+
         </div>
       </div>
     </div>

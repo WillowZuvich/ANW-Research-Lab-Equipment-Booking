@@ -4,7 +4,7 @@ from httpx._transports.asgi import ASGITransport
 from fastapi import status
 from auth import app
 from database import SessionLocal, Base, engine
-from models import Supplier, Equipment, Specification, Admin
+from models import Supplier, Equipment, Specification, Admin, Booking
 
 # Create test database schema
 Base.metadata.create_all(bind=engine)
@@ -128,3 +128,105 @@ async def test_remove_equipment(test_db):
         response = await ac.post("/api/removeequipment", json=payload)
         assert response.status_code == 200
         assert response.json()["message"] == "Equipment removed successfully!"
+
+@pytest.mark.asyncio
+async def test_edit_specification(test_db):
+    test_db.rollback()
+
+    # Ensure the equipment and spec exist first
+    equipment = test_db.query(Equipment).first()
+
+    if not equipment:
+        pytest.skip("No equipment found to test with")
+
+    spec = test_db.query(Specification).filter(Specification.EquipmentID == equipment.EquipID).first()
+
+    if not spec:
+        # Add a spec if missing
+        new_spec = Specification(EquipmentID=equipment.EquipID, Detail="Temporary Spec")
+        test_db.add(new_spec)
+        test_db.commit()
+        test_db.refresh(new_spec)
+
+    # Now test the edit
+    payload = {
+        "equipId": equipment.EquipID,
+        "updated_detail": "UpdatedSpecValue"
+    }
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        response = await ac.put("/api/editspecification", json=payload)
+        assert response.status_code == 200
+        assert response.json()["message"] == "Specification updated successfully!"
+
+@pytest.mark.asyncio
+async def test_get_user_info(test_db):
+    # Assuming the test admin from registration test exists
+    admin = test_db.query(Admin).filter_by(Email="testtestadmin@example.com").first()
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        response = await ac.get(f"/api/user?role=admin&userId={admin.AdminID}")
+        assert response.status_code == 200
+        assert response.json()["firstName"] == admin.FirstName
+
+@pytest.mark.asyncio
+async def test_get_all_suppliers(test_db):
+    supplier = test_db.query(Supplier).first()
+    if not supplier:
+        supplier = Supplier(Name="TestSupplier", Email="supplier@test.com", PhoneNumber="1234567890")
+        test_db.add(supplier)
+        test_db.commit()
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        response = await ac.get("/api/suppliers")
+        assert response.status_code == 200
+        assert isinstance(response.json(), list)
+        assert any(s["email"] == supplier.Email for s in response.json())
+
+@pytest.mark.asyncio
+async def test_get_all_equipment(test_db):
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        response = await ac.get("/api/equipment")
+        assert response.status_code == 200
+        assert isinstance(response.json(), list)
+
+@pytest.mark.asyncio
+async def test_get_equipment_details(test_db):
+    equipment = test_db.query(Equipment).first()
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        response = await ac.get(f"/api/equipment/{equipment.EquipID}")
+        assert response.status_code == 200
+        assert response.json()["EquipID"] == equipment.EquipID
+
+@pytest.mark.asyncio
+async def test_cancel_booking(test_db):
+    booking = test_db.query(Booking).filter(Booking.Status != "Booking Canceled").first()
+
+    if not booking:
+        pytest.skip("No cancellable booking available.")
+
+    user_type = "student" if booking.StudentID else "researcher"
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        response = await ac.put(f"/api/bookings/{booking.BookingID}/cancel?user_type={user_type}")
+        assert response.status_code == 200
+        assert response.json()["new_status"] == "Booking Canceled"
+
+@pytest.mark.asyncio
+async def test_return_equipment(test_db):
+    booking = test_db.query(Booking).filter(Booking.Status != "Returned").first()
+
+    if not booking:
+        pytest.skip("No returnable booking available.")
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        response = await ac.put(f"/api/bookings/{booking.BookingID}/return")
+        assert response.status_code == 200
+        assert response.json()["message"] == "Equipment returned successfully"
