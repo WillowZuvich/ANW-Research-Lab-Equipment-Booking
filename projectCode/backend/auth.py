@@ -228,12 +228,13 @@ async def add_supplier(supplier: AddSupplierRequest, db: Session = Depends(get_d
         db.commit()  
         db.refresh(new_supp)
         print(f" Supplier registered: {new_supp.SupplierId}")  
+        return {"message": "Supplier added successfully!"}
     except Exception as e:
         db.rollback()  #  Prevent half-saved data
         print(f" Error inserting user: {e}")
         raise HTTPException(status_code=500, detail="Database error")
 
-    return {"message": "Supplier added successfully!"}
+  
 
 class RequesterInfo(BaseModel):
     role: str  # "student" or "researcher"

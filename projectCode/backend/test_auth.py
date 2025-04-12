@@ -230,3 +230,21 @@ async def test_return_equipment(test_db):
         response = await ac.put(f"/api/bookings/{booking.BookingID}/return")
         assert response.status_code == 200
         assert response.json()["message"] == "Equipment returned successfully"
+
+@pytest.mark.asyncio
+async def test_add_supplier(test_db):
+    test_db.rollback()
+    supplier = test_db.query(Supplier).filter(Supplier.Name == "TestSupplier451").first()
+    test_db.delete(supplier)
+    test_db.commit()
+    payload = {
+        "name": "TestSupplier451",
+        "email": "TestEmail@Supplier.com",
+        "phoneNumber" : "5555544444"
+    }
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        response = await ac.post("/api/addsupplier", json=payload)
+        assert response.status_code == 200
+        assert response.json()["message"] == "Supplier added successfully!"
+
