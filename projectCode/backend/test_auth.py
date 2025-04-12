@@ -4,7 +4,7 @@ from httpx._transports.asgi import ASGITransport
 from fastapi import status
 from auth import app
 from database import SessionLocal, Base, engine
-from models import Supplier, Equipment, Specification, Admin, Booking, Student
+from models import Supplier, Equipment, Specification, Admin, Booking, Student, Researcher
 
 # Create test database schema
 Base.metadata.create_all(bind=engine)
@@ -253,7 +253,7 @@ async def test_get_student_booking(test_db):
     test_db.rollback()
     student = test_db.query(Student).filter(Student.StudentID == 19).first()
     if not student:
-        pytest.skip("No student matching ID=1.")
+        pytest.skip("No student matching ID=19.")
 
     payload = {
         "student_id" : "19"
@@ -262,3 +262,19 @@ async def test_get_student_booking(test_db):
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         response = await ac.get("/api/student/bookings", params=payload)
         assert response.status_code == 200
+
+@pytest.mark.asyncio
+async def test_get_researcher_booking(test_db):
+    test_db.rollback()
+    researcher = test_db.query(Researcher).filter(Researcher.EmpID == 3).first()
+    if not researcher:
+        pytest.skip("No Researcher matching ID=3.")
+
+    payload = {
+        "researcher_id" : "3"
+    }
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        response = await ac.get("/api/researcher/bookings", params=payload)
+        assert response.status_code == 200
+
