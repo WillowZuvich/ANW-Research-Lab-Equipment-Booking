@@ -4,7 +4,7 @@ from httpx._transports.asgi import ASGITransport
 from fastapi import status
 from auth import app
 from database import SessionLocal, Base, engine
-from models import Supplier, Equipment, Specification, Admin, Booking
+from models import Supplier, Equipment, Specification, Admin, Booking, Student
 
 # Create test database schema
 Base.metadata.create_all(bind=engine)
@@ -239,7 +239,7 @@ async def test_add_supplier(test_db):
     test_db.commit()
     payload = {
         "name": "TestSupplier451",
-        "email": "TestEmail@Supplier.com",
+        "email": "TestEmail1@Supplier.com",
         "phoneNumber" : "5555544444"
     }
     transport = ASGITransport(app=app)
@@ -248,3 +248,17 @@ async def test_add_supplier(test_db):
         assert response.status_code == 200
         assert response.json()["message"] == "Supplier added successfully!"
 
+@pytest.mark.asyncio
+async def test_get_student_booking(test_db):
+    test_db.rollback()
+    student = test_db.query(Student).filter(Student.StudentID == 19).first()
+    if not student:
+        pytest.skip("No student matching ID=1.")
+
+    payload = {
+        "student_id" : "19"
+    }
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        response = await ac.get("/api/student/bookings", params=payload)
+        assert response.status_code == 200
