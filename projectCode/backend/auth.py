@@ -228,12 +228,13 @@ async def add_supplier(supplier: AddSupplierRequest, db: Session = Depends(get_d
         db.commit()  
         db.refresh(new_supp)
         print(f" Supplier registered: {new_supp.SupplierId}")  
+        return {"message": "Supplier added successfully!"}
     except Exception as e:
         db.rollback()  #  Prevent half-saved data
         print(f" Error inserting user: {e}")
         raise HTTPException(status_code=500, detail="Database error")
 
-    return {"message": "Supplier added successfully!"}
+  
 
 class RequesterInfo(BaseModel):
     role: str  # "student" or "researcher"
@@ -255,60 +256,65 @@ class BookingResponse(BaseModel):
 
 @app.get("/api/student/bookings", response_model=List[BookingResponse])
 async def get_student_bookings(student_id: int, db: Session = Depends(get_db)):
+
     bookings = db.query(Booking).filter(Booking.StudentID == student_id).all()
     return [
-        BookingResponse(
-            BookingID=b.BookingID,
-            Status=b.Status,
-            EquipmentName=b.equipment.Name,
-            RequestDate=b.RequestDate.strftime("%m/%d/%Y %H:%M:%S") if b.RequestDate else "",
-            StartTime=b.StartTime.strftime("%m/%d/%Y %H:%M:%S") if b.StartTime else "",
-            EndTime=b.EndTime.strftime("%m/%d/%Y %H:%M:%S") if b.EndTime else "",
-            AdminAction=b.AdminAction or ""
-        )
+            BookingResponse(
+                BookingID=b.BookingID,
+                Status=b.Status,
+                EquipmentName=b.equipment.Name if b.equipment else "",
+                RequestDate=b.RequestDate.strftime("%m/%d/%Y %H:%M:%S") if b.RequestDate else "",
+                StartTime=b.StartTime.strftime("%m/%d/%Y %H:%M:%S") if b.StartTime else "",
+                EndTime=b.EndTime.strftime("%m/%d/%Y %H:%M:%S") if b.EndTime else "",
+                AdminAction=b.AdminAction or ""
+            )
         for b in bookings
     ]
 
+
 @app.get("/api/admin/bookings", response_model=List[BookingResponse])
 async def get_all_bookings(db: Session = Depends(get_db)):
-    bookings = db.query(Booking).options(
-        joinedload(Booking.student),
-        joinedload(Booking.researcher),
-        joinedload(Booking.equipment)
-    ).all()
+    try:
+        bookings = db.query(Booking).options(
+            joinedload(Booking.student),
+            joinedload(Booking.researcher),
+            joinedload(Booking.equipment)
+        ).all()
 
-    results = []
-    for b in bookings:
-        # Handle null equipment case
-        equipment_name = b.equipment.Name if b.equipment else "Unknown Equipment"
+        results = []
+        for b in bookings:
+            # Handle null equipment case
+            equipment_name = b.equipment.Name if b.equipment else "Unknown Equipment"
+            
+            # Build requester info only if exists
+            # requester_info = None
+            if b.student:
+                requester_info = RequesterInfo(
+                    role="student",
+                    id=b.student.StudentID,
+                    name=f"{b.student.FirstName} {b.student.LastName}"
+                )
+            elif b.researcher:
+                requester_info = RequesterInfo(
+                    role="researcher",
+                    id=b.researcher.EmpID,
+                    name=f"{b.researcher.FirstName} {b.researcher.LastName}"
+                )
+
+            results.append(BookingResponse(
+                BookingID=b.BookingID,
+                Status=b.Status,
+                EquipmentName=equipment_name,
+                RequestDate=b.RequestDate.isoformat() if b.RequestDate else None,
+                StartTime=b.StartTime.isoformat() if b.StartTime else None,
+                EndTime=b.EndTime.isoformat() if b.EndTime else None,
+                AdminAction=b.AdminAction,
+                requester_info=requester_info.dict() if requester_info else None
+            ))
         
-        # Build requester info only if exists
-        # requester_info = None
-        if b.student:
-            requester_info = RequesterInfo(
-                role="student",
-                id=b.student.StudentID,
-                name=f"{b.student.FirstName} {b.student.LastName}"
-            )
-        elif b.researcher:
-            requester_info = RequesterInfo(
-                role="researcher",
-                id=b.researcher.EmpID,
-                name=f"{b.researcher.FirstName} {b.researcher.LastName}"
-            )
-
-        results.append(BookingResponse(
-            BookingID=b.BookingID,
-            Status=b.Status,
-            EquipmentName=equipment_name,
-            RequestDate=b.RequestDate.isoformat() if b.RequestDate else None,
-            StartTime=b.StartTime.isoformat() if b.StartTime else None,
-            EndTime=b.EndTime.isoformat() if b.EndTime else None,
-            AdminAction=b.AdminAction,
-            requester_info=requester_info.dict() if requester_info else None
-        ))
-    
-    return results
+        return results
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Database error retrieving all bookings.")
 
 
 @app.get("/api/researcher/bookings", response_model=List[BookingResponse])
